@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FYNK · System Oceny Grafika</title>
+<style>
+:root {
+  --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a;
+  --accent: #6c63ff; --accent2: #ff6b6b; --accent3: #43d9a2; --accent4: #ffd166;
+  --text: #e8eaf0; --muted: #7b829a; --border: #2e3248;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* APP BAR */
+.app-bar {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 32px; display: flex; align-items: center; gap: 32px; height: 56px;
+}
+.app-logo { font-size: 18px; font-weight: 800; white-space: nowrap; }
+.app-logo .sub { color: var(--muted); font-weight: 400; margin-left: 4px; font-size: 14px; }
+.app-tabs { display: flex; gap: 4px; flex: 1; }
+.tab-btn {
+  background: none; border: none; color: var(--muted);
+  font-size: 14px; font-weight: 500; padding: 8px 16px;
+  border-radius: 8px; cursor: pointer; transition: all .15s;
+}
+.tab-btn:hover { background: var(--surface2); color: var(--text); }
+.tab-btn.active { background: rgba(108,99,255,.15); color: var(--accent); }
+.app-badge { font-size: 11px; color: var(--muted); white-space: nowrap; background: var(--surface2); padding: 4px 10px; border-radius: 20px; }
+
+/* LAYOUT */
+.app-main { padding: 32px; max-width: 1200px; margin: 0 auto; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; }
+.section-block { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
+.section-block h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+
+/* METRIC CARDS */
+.metric-row { display: flex; gap: 16px; margin-bottom: 24px; }
+.metric-card { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+.metric-card .val { font-size: 30px; font-weight: 800; }
+.metric-card .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+.metric-card .delta { font-size: 12px; margin-top: 8px; }
+.delta.up { color: var(--accent3); }
+.delta.dn { color: var(--accent2); }
+
+/* TABLE */
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding: 10px 16px; border-bottom: 1px solid var(--border); }
+td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+.clickable-row { cursor: pointer; }
+.clickable-row:hover td { background: rgba(108,99,255,.04); }
+
+/* TAGS */
+.tag { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.tag.won { background: rgba(67,217,162,.15); color: var(--accent3); }
+.tag.lost { background: rgba(255,107,107,.15); color: var(--accent2); }
+.tag.lead { background: rgba(108,99,255,.2); color: var(--accent); }
+.tag.support { background: var(--surface2); color: var(--muted); }
+.tag.excellent { background: rgba(67,217,162,.15); color: var(--accent3); }
+.tag.good { background: rgba(255,209,102,.15); color: var(--accent4); }
+.tag.attention { background: rgba(255,107,107,.15); color: var(--accent2); }
+
+/* WIN RATE BAR */
+.wr-bar { display: flex; align-items: center; gap: 8px; }
+.wr-track { width: 80px; background: var(--surface2); border-radius: 3px; height: 6px; flex-shrink: 0; }
+.wr-fill { height: 6px; border-radius: 3px; }
+
+/* ALERTS */
+.alert-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; display: flex; align-items: flex-start; gap: 16px; margin-bottom: 10px; }
+.alert-card.warn { border-color: rgba(255,107,107,.4); background: rgba(255,107,107,.05); }
+.alert-card.ok { border-color: rgba(67,217,162,.4); background: rgba(67,217,162,.05); }
+.alert-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+.alert-text h4 { font-size: 14px; font-weight: 600; }
+.alert-text p { font-size: 13px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+/* DESIGNER GRID */
+.designer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.designer-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; cursor: pointer; transition: all .2s; }
+.designer-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(108,99,255,.12); }
+.designer-card.selected { border-color: var(--accent); background: rgba(108,99,255,.06); }
+.dc-name { font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+.dc-role { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+.dc-metrics { display: flex; gap: 0; }
+.dc-m { flex: 1; }
+.dc-m .val { font-size: 20px; font-weight: 800; }
+.dc-m .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 1px; }
+
+/* DESIGNER DETAIL */
+.designer-detail { background: var(--surface); border: 1px solid var(--accent); border-radius: 16px; padding: 32px; margin-top: 0; animation: slideDown .25s ease; }
+@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+.dd-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+.dd-name { font-size: 24px; font-weight: 800; }
+.dd-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.dd-metrics { display: flex; gap: 32px; margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.dd-m .val { font-size: 28px; font-weight: 800; }
+.dd-m .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+.dd-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 24px; }
+.bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.bar-lbl { font-size: 13px; width: 90px; flex-shrink: 0; }
+.bar-track { flex: 1; background: var(--surface2); border-radius: 3px; height: 8px; }
+.bar-fill { height: 8px; border-radius: 3px; }
+.bar-pct { font-size: 12px; font-weight: 700; width: 32px; text-align: right; }
+.dd-insight { background: rgba(108,99,255,.08); border: 1px solid rgba(108,99,255,.2); border-radius: 10px; padding: 14px 18px; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+.close-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all .15s; }
+.close-btn:hover { color: var(--text); }
+
+/* INNER TABS */
+.inner-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.inner-tab { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 13px; padding: 6px 16px; border-radius: 8px; cursor: pointer; transition: all .15s; }
+.inner-tab.active { background: rgba(108,99,255,.15); border-color: var(--accent); color: var(--accent); }
+
+/* DEAL LOOKUP */
+.lookup-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; max-width: 580px; }
+.lookup-row { display: flex; gap: 10px; }
+.lookup-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; color: var(--text); font-size: 16px; font-family: monospace; outline: none; transition: border-color .2s; }
+.lookup-input:focus { border-color: var(--accent); }
+.lookup-btn { background: var(--accent); border: none; color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.lookup-hint { margin-top: 14px; font-size: 12px; color: var(--muted); line-height: 1.8; }
+.lookup-result { margin-top: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+.lr-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.lr-name { font-size: 20px; font-weight: 700; }
+.lr-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.crew-row { background: var(--surface2); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+.crew-name { font-size: 15px; font-weight: 700; width: 140px; flex-shrink: 0; }
+.crew-role-col { width: 80px; flex-shrink: 0; }
+.crew-stats { flex: 1; display: flex; gap: 28px; }
+.cs-item .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.cs-item .val { font-size: 18px; font-weight: 800; margin-top: 2px; }
+
+/* FILTRY */
+.filter-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+.fg select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 14px; outline: none; min-width: 130px; }
+.fg select:focus { border-color: var(--accent); }
+.filter-btn { background: var(--accent); border: none; color: white; padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.filter-reset { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+.filter-info { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+
+/* LOSS CHART */
+.loss-chart { display: flex; gap: 20px; align-items: flex-end; height: 140px; margin: 4px 0 12px; }
+.lc-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+.lc-bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; }
+.lc-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; }
+.lc-pct { font-size: 18px; font-weight: 800; }
+.lc-lbl { font-size: 11px; color: var(--muted); text-align: center; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 40px 24px; color: var(--muted); }
+.empty-state .icon { font-size: 36px; margin-bottom: 10px; }
+
+/* TWO COL GRID */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+
+@media (max-width: 800px) {
+  .app-main { padding: 16px; }
+  .metric-row { flex-direction: column; }
+  .two-col { grid-template-columns: 1fr; }
+  .dd-two-col { grid-template-columns: 1fr; }
+  .designer-grid { grid-template-columns: 1fr; }
+  .crew-row { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-bar">
+  <div class="app-logo">FYNK<span class="sub">/ Graficy</span></div>
+  <nav class="app-tabs">
+    <button class="tab-btn active" data-tab="dashboard" onclick="showTab('dashboard',this)">Dashboard</button>
+    <button class="tab-btn" data-tab="graficy" onclick="showTab('graficy',this)">Graficy</button>
+    <button class="tab-btn" data-tab="lookup" onclick="showTab('lookup',this)">Deal Lookup</button>
+    <button class="tab-btn" data-tab="filtry" onclick="showTab('filtry',this)">Filtry</button>
+  </nav>
+  <div class="app-badge">Dane przykładowe · 2026</div>
+</header>
+
+<main class="app-main">
+
+  <!-- ── DASHBOARD ── -->
+  <section id="tab-dashboard" class="tab-panel active">
+    <div class="section-title">Dashboard · Maj 2026</div>
+    <div class="metric-row">
+      <div class="metric-card">
+        <div class="val" style="color:var(--accent3);">67%</div>
+        <div class="lbl">Team Win Rate</div>
+        <div class="delta up">▲ +3% vs kwiecień</div>
+      </div>
+      <div class="metric-card">
+        <div class="val" style="color:var(--accent);">713k</div>
+        <div class="lbl">Revenue YTD (PLN)</div>
+        <div class="delta up">10 wygranych dealów</div>
+      </div>
+      <div class="metric-card">
+        <div class="val" style="color:var(--accent4);">8</div>
+        <div class="lbl">Otwarte szanse</div>
+        <div class="delta" style="color:var(--muted);">w toku</div>
+      </div>
+      <div class="metric-card">
+        <div class="val" style="color:var(--accent3); font-size:22px;">Jeroen V.</div>
+        <div class="lbl">Top Win Rate</div>
+        <div class="delta up">77% · Packaging DE 81%</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="section-block" style="margin-bottom:0;">
+        <h3>Ranking — Win Rate (Tryb A · Kreatywni)</h3>
+        <table id="ranking-table"></table>
+      </div>
+      <div class="section-block" style="margin-bottom:0;">
+        <h3>Powody Strat</h3>
+        <div class="loss-chart" id="loss-chart"></div>
+        <p style="font-size:12px; color:var(--muted); margin-top:8px;">5 zamkniętych szans LOST · Maj 2026</p>
+      </div>
+    </div>
+
+    <div style="height:24px;"></div>
+    <div class="section-block">
+      <h3>Alerty Miesiąca</h3>
+      <div id="alerts"></div>
+    </div>
+  </section>
+
+  <!-- ── GRAFICY ── -->
+  <section id="tab-graficy" class="tab-panel">
+    <div class="section-title">Graficy</div>
+    <div class="inner-tabs">
+      <button class="inner-tab active" onclick="switchMode('creative',this)">🎨 Kreatywni (Tryb A)</button>
+      <button class="inner-tab" onclick="switchMode('technical',this)">⚙️ Techniczni (Tryb B)</button>
+    </div>
+    <div id="creative-section">
+      <div class="designer-grid" id="designer-grid"></div>
+      <div id="designer-detail"></div>
+    </div>
+    <div id="technical-section" style="display:none;">
+      <div class="section-block"><table id="tech-table"></table></div>
+    </div>
+  </section>
+
+  <!-- ── DEAL LOOKUP ── -->
+  <section id="tab-lookup" class="tab-panel">
+    <div class="section-title">Deal Lookup</div>
+    <div class="lookup-box">
+      <div style="font-size:16px; font-weight:700; margin-bottom:14px;">Wklej numer szansy LiveSpace</div>
+      <div class="lookup-row">
+        <input class="lookup-input" id="lookup-input" type="text" placeholder="np. 48667" oninput="lookupDeal()">
+        <button class="lookup-btn" onclick="lookupDeal()">Szukaj</button>
+      </div>
+      <div class="lookup-hint">
+        Dostępne ID (demo): <span style="font-family:monospace; color:var(--text);">48667 · 48890 · 49123 · 49234 · 49456 · 49578 · 49690 · 49800 · 49910 · 50012 · 50134 · 50256 · 50378 · 50489 · 50600</span>
+      </div>
+    </div>
+    <div id="lookup-result"></div>
+  </section>
+
+  <!-- ── FILTRY ── -->
+  <section id="tab-filtry" class="tab-panel">
+    <div class="section-title">Filtry</div>
+    <div class="filter-bar">
+      <div class="fg"><label>Grafik</label><select id="f-designer"><option value="">Wszyscy</option></select></div>
+      <div class="fg"><label>Kategoria</label>
+        <select id="f-cat">
+          <option value="">Wszystkie</option>
+          <option>Packaging</option><option>Branding</option><option>POS</option><option>KV</option><option>Campaign</option>
+        </select>
+      </div>
+      <div class="fg"><label>Rynek</label>
+        <select id="f-market"><option value="">Wszystkie</option><option>PL</option><option>DE</option></select>
+      </div>
+      <div class="fg"><label>Status</label>
+        <select id="f-status"><option value="">Wszystkie</option><option value="won">Won</option><option value="lost">Lost</option></select>
+      </div>
+      <button class="filter-btn" onclick="applyFilters()">Filtruj</button>
+      <button class="filter-reset" onclick="resetFilters()">Reset</button>
+    </div>
+    <div class="filter-info" id="filter-info"></div>
+    <div class="section-block"><table id="filter-table"></table></div>
+  </section>
+
+</main>
+
+<script>
+// ══════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════
+const DESIGNERS = [
+  { id:'sandra',   name:'Sandra K.',    role:'Creative Lead',       level:'SENIOR', type:'creative', rate:75, winRate:74, revenue:380000, rph:3200, deals:24,
+    cat:{Packaging:72,Branding:82,POS:68,KV:73,Campaign:70}, mkt:{PL:70,DE:82},
+    insight:'Dominuje na rynku DE — 82% win rate vs 70% w PL. Najsilniejsza w Branding (82%). Naturalny LEAD do projektów premium DE.' },
+  { id:'michal',   name:'Michał Kot',   role:'Creative Designer',   level:'SENIOR', type:'creative', rate:51, winRate:71, revenue:312000, rph:2900, deals:20,
+    cat:{Packaging:68,Branding:71,POS:60,KV:65,Campaign:65}, mkt:{PL:68,DE:80},
+    insight:'Najsilniejszy w Packaging DE (80%). Przy przetargach DE packaging — priorytet LEAD.' },
+  { id:'jeroen',   name:'Jeroen V.',    role:'Creative Designer',   level:'SENIOR', type:'creative', rate:85, winRate:77, revenue:420000, rph:3500, deals:17,
+    cat:{Packaging:81,Branding:75,POS:70,KV:80,Campaign:78}, mkt:{PL:70,DE:85},
+    insight:'Najwyższy win rate w zespole. Jedyna osoba >80% w Packaging DE. Priorytet LEAD do dużych przetargów europejskich.' },
+  { id:'kornelia', name:'Kornelia W.',  role:'Creative Designer',   level:'MID',    type:'creative', rate:45, winRate:65, revenue:287000, rph:2600, deals:22,
+    cat:{Packaging:65,Branding:70,POS:62,KV:60,Campaign:63}, mkt:{PL:65,DE:66},
+    insight:'Stabilna we wszystkich kategoriach. Branding (70%) to jej strongest area. Dobra jako SUPPORT do dużych projektów.' },
+  { id:'julia',    name:'Julia Ż.',     role:'Creative Designer',   level:'MID',    type:'creative', rate:48, winRate:69, revenue:241000, rph:2500, deals:19,
+    cat:{Packaging:64,Branding:74,POS:65,KV:68,Campaign:70}, mkt:{PL:72,DE:62},
+    insight:'Wygrywa Branding PL (74%) i Campaign (70%). Słabszy wynik na rynku DE — wskazać jako LEAD głównie do projektów polskich.' },
+  { id:'klaudia',  name:'Klaudia S.',   role:'Creative Designer',   level:'MID',    type:'creative', rate:43, winRate:58, revenue:215000, rph:2100, deals:18,
+    cat:{Packaging:55,Branding:62,POS:58,KV:57,Campaign:55}, mkt:{PL:60,DE:54},
+    insight:'Win rate poniżej średniej (58% vs 67%). Packaging (55%) wymaga pracy. Zalecana rola SUPPORT przed kolejnym LEAD assignment.' },
+  { id:'katarzyna',name:'Katarzyna D.', role:'Creative Designer',   level:'MID',    type:'creative', rate:46, winRate:62, revenue:195000, rph:2300, deals:16,
+    cat:{Packaging:60,Branding:66,POS:63,KV:58,Campaign:62}, mkt:{PL:65,DE:55},
+    insight:'Dobry wynik w Branding PL (66%). Wymaga wsparcia na rynku DE (55%). Wskazana jako LEAD do średnich projektów PL.' },
+  { id:'natalia',  name:'Natalia P.',   role:'Creative Designer',   level:'JR',     type:'creative', rate:40, winRate:55, revenue:168000, rph:1900, deals:15,
+    cat:{Packaging:52,Branding:60,POS:55,KV:54,Campaign:50}, mkt:{PL:57,DE:50},
+    insight:'Najniższy win rate w grupie (55%). Wskazana rotacja SUPPORT i mentoring. Potencjał w Branding (60%). Nie przydzielać jako LEAD do DE.' },
+  { id:'kuba',   name:'Kuba M.',   role:'Technical Lead',     level:'SENIOR', type:'technical', revRate:1.2, onTime:94, repeat:87 },
+  { id:'filip',  name:'Filip B.',  role:'Technical Designer', level:'MID',    type:'technical', revRate:1.8, onTime:88, repeat:82 },
+  { id:'maja',   name:'Maja K.',   role:'Technical Designer', level:'MID',    type:'technical', revRate:1.3, onTime:92, repeat:85 },
+  { id:'bartek', name:'Bartek W.', role:'Technical Designer', level:'JR',     type:'technical', revRate:2.1, onTime:85, repeat:79 },
+  { id:'marta',  name:'Marta C.',  role:'Technical Designer', level:'JR',     type:'technical', revRate:1.4, onTime:91, repeat:84 },
+];
+
+const DEALS = [
+  { id:'48667', name:'Dega-Rebranding',       status:'won',  why:null,            value:45000,  cat:'Branding', mkt:'PL', date:'2026-03-15', crew:[{id:'sandra',role:'LEAD'},{id:'michal',role:'SUPPORT'},{id:'klaudia',role:'SUPPORT'}] },
+  { id:'48890', name:'Müller-CV Relaunch',    status:'lost', why:'Kreacja',       value:38000,  cat:'Packaging',mkt:'DE', date:'2026-03-22', crew:[{id:'michal',role:'LEAD'},{id:'klaudia',role:'SUPPORT'}] },
+  { id:'49123', name:'Henkel-KV Winter',      status:'won',  why:null,            value:62000,  cat:'KV',       mkt:'DE', date:'2026-04-01', crew:[{id:'jeroen',role:'LEAD'},{id:'sandra',role:'SUPPORT'}] },
+  { id:'49234', name:'Kerrygold-Packaging',   status:'won',  why:null,            value:53000,  cat:'Packaging',mkt:'DE', date:'2026-04-08', crew:[{id:'michal',role:'LEAD'},{id:'kornelia',role:'SUPPORT'}] },
+  { id:'49456', name:'OBI-POS Summer',        status:'lost', why:'Cena',          value:28000,  cat:'POS',      mkt:'PL', date:'2026-04-14', crew:[{id:'julia',role:'LEAD'},{id:'klaudia',role:'SUPPORT'}] },
+  { id:'49578', name:'Danone-Rebranding',     status:'won',  why:null,            value:71000,  cat:'Branding', mkt:'PL', date:'2026-04-20', crew:[{id:'sandra',role:'LEAD'}] },
+  { id:'49690', name:'Nestlé-Campaign Q1',    status:'won',  why:null,            value:89000,  cat:'Campaign', mkt:'PL', date:'2026-04-28', crew:[{id:'jeroen',role:'LEAD'},{id:'julia',role:'SUPPORT'},{id:'kornelia',role:'SUPPORT'}] },
+  { id:'49800', name:'Lidl-Packaging',        status:'lost', why:'Kreacja',       value:34000,  cat:'Packaging',mkt:'DE', date:'2026-05-05', crew:[{id:'natalia',role:'LEAD'},{id:'klaudia',role:'SUPPORT'}] },
+  { id:'49910', name:'Unilever-Rebranding',   status:'won',  why:null,            value:95000,  cat:'Branding', mkt:'DE', date:'2026-05-09', crew:[{id:'michal',role:'LEAD'},{id:'sandra',role:'SUPPORT'}] },
+  { id:'50012', name:'Biedronka-KV',          status:'lost', why:'Cena',          value:22000,  cat:'KV',       mkt:'PL', date:'2026-05-12', crew:[{id:'katarzyna',role:'LEAD'},{id:'julia',role:'SUPPORT'}] },
+  { id:'50134', name:'Carrefour-POS',         status:'won',  why:null,            value:41000,  cat:'POS',      mkt:'PL', date:'2026-05-15', crew:[{id:'kornelia',role:'LEAD'},{id:'natalia',role:'SUPPORT'}] },
+  { id:'50256', name:'P&G-Packaging Premium', status:'won',  why:null,            value:112000, cat:'Packaging',mkt:'DE', date:'2026-05-18', crew:[{id:'jeroen',role:'LEAD'},{id:'sandra',role:'SUPPORT'},{id:'michal',role:'SUPPORT'}] },
+  { id:'50378', name:'Hochland-Branding',     status:'won',  why:null,            value:67000,  cat:'Branding', mkt:'DE', date:'2026-05-21', crew:[{id:'julia',role:'LEAD'},{id:'katarzyna',role:'SUPPORT'}] },
+  { id:'50489', name:'Tymbark-Campaign',      status:'lost', why:'Zakres usług',  value:55000,  cat:'Campaign', mkt:'PL', date:'2026-05-23', crew:[{id:'natalia',role:'LEAD'},{id:'klaudia',role:'SUPPORT'},{id:'kornelia',role:'SUPPORT'}] },
+  { id:'50600', name:'Mars-Packaging',        status:'won',  why:null,            value:78000,  cat:'Packaging',mkt:'PL', date:'2026-05-26', crew:[{id:'sandra',role:'LEAD'},{id:'michal',role:'SUPPORT'}] },
+];
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+const byId = id => DESIGNERS.find(d => d.id === id);
+const wrColor = p => p >= 70 ? 'var(--accent3)' : p >= 60 ? 'var(--accent4)' : 'var(--accent2)';
+const wrFill  = p => p >= 70 ? 'var(--accent3)' : p >= 60 ? 'var(--accent4)' : 'var(--accent2)';
+const fmtPLN  = n => n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(0)+'k' : n;
+const statusTag = d => d.status === 'won'
+  ? '<span class="tag won">WON</span>'
+  : `<span class="tag lost">LOST · ${d.why}</span>`;
+const dealsByDesigner = id => DEALS.filter(d => d.crew.some(c => c.id === id));
+
+// ══════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+function goToTab(name) {
+  const btn = document.querySelector(`.tab-btn[data-tab="${name}"]`);
+  showTab(name, btn);
+}
+
+// ══════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════
+function renderDashboard() {
+  // Ranking
+  const creative = DESIGNERS.filter(d => d.type === 'creative').sort((a,b) => b.winRate - a.winRate);
+  const rows = creative.map((d,i) => `
+    <tr class="clickable-row" onclick="goToDesigner('${d.id}')">
+      <td style="color:var(--muted);font-size:12px;">${i+1}</td>
+      <td><strong>${d.name}</strong> <span style="font-size:11px;color:var(--muted);margin-left:4px;">${d.level}</span></td>
+      <td>
+        <div class="wr-bar">
+          <div class="wr-track"><div class="wr-fill" style="width:${d.winRate}%;background:${wrFill(d.winRate)};height:6px;border-radius:3px;"></div></div>
+          <span style="font-weight:700;color:${wrColor(d.winRate)};font-size:13px;">${d.winRate}%</span>
+        </div>
+      </td>
+      <td style="color:var(--muted);font-size:13px;">${fmtPLN(d.revenue)} PLN</td>
+    </tr>`).join('');
+  document.getElementById('ranking-table').innerHTML =
+    `<thead><tr><th>#</th><th>Grafik</th><th>Win Rate</th><th>Revenue</th></tr></thead><tbody>${rows}</tbody>`;
+
+  // Loss chart
+  const lost = DEALS.filter(d => d.status === 'lost');
+  const reasons = {};
+  lost.forEach(d => { reasons[d.why] = (reasons[d.why]||0)+1; });
+  const colors = { Cena:'var(--accent4)', Kreacja:'var(--accent2)', 'Zakres usług':'var(--accent)' };
+  const max = Math.max(...Object.values(reasons));
+  const chartHtml = Object.entries(reasons).map(([r,n]) => {
+    const pct = Math.round(n/lost.length*100);
+    const h = Math.round(n/max*100);
+    const c = colors[r]||'var(--muted)';
+    return `<div class="lc-col">
+      <div class="lc-bar-wrap"><div class="lc-bar" style="height:${h}%;background:${c};opacity:.85;"></div></div>
+      <div class="lc-pct" style="color:${c};">${pct}%</div>
+      <div class="lc-lbl">${r}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('loss-chart').innerHTML = chartHtml;
+
+  // Alerts
+  const avg = Math.round(creative.reduce((s,d)=>s+d.winRate,0)/creative.length);
+  let alertsHtml = '';
+  creative.filter(d=>d.winRate<60).forEach(d => {
+    alertsHtml += `<div class="alert-card warn"><div class="alert-icon">⚠️</div><div class="alert-text"><h4>${d.name} — Win Rate poniżej 60%</h4><p>Aktualny wynik: ${d.winRate}%. Średnia zespołu: ${avg}%. Zalecana analiza przydzielanych projektów i rola SUPPORT.</p></div></div>`;
+  });
+  DESIGNERS.filter(d=>d.type==='technical'&&d.revRate>1.5).forEach(d => {
+    alertsHtml += `<div class="alert-card warn"><div class="alert-icon">🔄</div><div class="alert-text"><h4>${d.name} — Revision Rate powyżej celu</h4><p>Wynik: ${d.revRate} rundy (cel ≤ 1,5). Sprawdź ostatnie projekty i feedback od PM.</p></div></div>`;
+  });
+  const top = creative[0];
+  alertsHtml += `<div class="alert-card ok"><div class="alert-icon">🏆</div><div class="alert-text"><h4>${top.name} — najwyższy win rate miesiąca</h4><p>${top.winRate}% ogólnie · DE ${top.mkt.DE}%. Priorytetowy LEAD do przetargów premium.</p></div></div>`;
+  document.getElementById('alerts').innerHTML = alertsHtml;
+}
+
+// ══════════════════════════════════════════════
+//  GRAFICY
+// ══════════════════════════════════════════════
+function renderDesignerGrid() {
+  const creative = DESIGNERS.filter(d => d.type === 'creative');
+  document.getElementById('designer-grid').innerHTML = creative.map(d => `
+    <div class="designer-card" id="dc-${d.id}" onclick="selectDesigner('${d.id}')">
+      <div class="dc-name">${d.name}</div>
+      <div class="dc-role">${d.role} · ${d.level}</div>
+      <div class="dc-metrics">
+        <div class="dc-m">
+          <div class="val" style="color:${wrColor(d.winRate)};">${d.winRate}%</div>
+          <div class="lbl">Win Rate</div>
+        </div>
+        <div class="dc-m">
+          <div class="val" style="color:var(--accent);">${fmtPLN(d.revenue)}</div>
+          <div class="lbl">Revenue PLN</div>
+        </div>
+        <div class="dc-m">
+          <div class="val" style="color:var(--muted);font-size:18px;">${d.deals}</div>
+          <div class="lbl">Dealów</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+let activeDesigner = null;
+
+function selectDesigner(id) {
+  if (activeDesigner === id) { closeDetail(); return; }
+  activeDesigner = id;
+  document.querySelectorAll('.designer-card').forEach(el => el.classList.remove('selected'));
+  const card = document.getElementById('dc-' + id);
+  if (card) card.classList.add('selected');
+  renderDetail(id);
+}
+
+function renderDetail(id) {
+  const d = byId(id);
+  if (!d || d.type !== 'creative') return;
+  const myDeals = dealsByDesigner(id).slice().reverse().slice(0,6);
+
+  const catBars = Object.entries(d.cat).map(([k,v]) =>
+    `<div class="bar-row">
+      <span class="bar-lbl">${k}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${v}%;background:${wrFill(v)};height:8px;border-radius:3px;"></div></div>
+      <span class="bar-pct" style="color:${wrColor(v)};">${v}%</span>
+    </div>`).join('');
+
+  const mktBars = Object.entries(d.mkt).map(([k,v]) =>
+    `<div class="bar-row">
+      <span class="bar-lbl">${k}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${v}%;background:${wrFill(v)};height:8px;border-radius:3px;"></div></div>
+      <span class="bar-pct" style="color:${wrColor(v)};">${v}%</span>
+    </div>`).join('');
+
+  const dealRows = myDeals.map(deal => {
+    const myRole = deal.crew.find(c=>c.id===id)?.role||'?';
+    const rTag = myRole==='LEAD' ? '<span class="tag lead">LEAD</span>' : '<span class="tag support">SUPPORT</span>';
+    return `<tr>
+      <td style="font-family:monospace;font-size:12px;color:var(--muted);">[${deal.id}]</td>
+      <td>${deal.name}</td>
+      <td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:4px;">${deal.cat}</span></td>
+      <td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:4px;">${deal.mkt}</span></td>
+      <td>${rTag}</td>
+      <td>${statusTag(deal)}</td>
+      <td style="font-weight:700;text-align:right;">${fmtPLN(deal.value)} PLN</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('designer-detail').innerHTML = `
+    <div class="designer-detail">
+      <div class="dd-header">
+        <div>
+          <div class="dd-name">${d.name} <span style="font-size:12px;background:rgba(108,99,255,.2);color:var(--accent);padding:2px 10px;border-radius:10px;font-weight:700;vertical-align:middle;">${d.level}</span></div>
+          <div class="dd-meta">${d.role} · ${d.rate} PLN/h</div>
+        </div>
+        <button class="close-btn" onclick="closeDetail()">✕ Zamknij</button>
+      </div>
+      <div class="dd-metrics">
+        <div class="dd-m"><div class="val" style="color:${wrColor(d.winRate)};">${d.winRate}%</div><div class="lbl">Win Rate</div></div>
+        <div class="dd-m"><div class="val" style="color:var(--accent);">${fmtPLN(d.revenue)} PLN</div><div class="lbl">Revenue YTD</div></div>
+        <div class="dd-m"><div class="val" style="color:var(--accent4);">${fmtPLN(d.rph)}</div><div class="lbl">PLN / Godzina</div></div>
+        <div class="dd-m"><div class="val">${d.deals}</div><div class="lbl">Dealów</div></div>
+        <div class="dd-m"><div class="val" style="color:${wrColor(d.mkt.DE)};">${d.mkt.DE}%</div><div class="lbl">Win Rate DE</div></div>
+      </div>
+      <div class="dd-insight">💡 ${d.insight}</div>
+      <div class="dd-two-col">
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">Win Rate wg kategorii</div>${catBars}</div>
+        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">Win Rate wg rynku</div>${mktBars}</div>
+      </div>
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Ostatnie projekty</div>
+      <table>
+        <thead><tr><th>Deal ID</th><th>Projekt</th><th>Kategoria</th><th>Rynek</th><th>Rola</th><th>Status</th><th style="text-align:right;">Wartość</th></tr></thead>
+        <tbody>${dealRows || '<tr><td colspan="7" style="text-align:center;color:var(--muted);">Brak danych</td></tr>'}</tbody>
+      </table>
+    </div>`;
+
+  document.getElementById('designer-detail').scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function closeDetail() {
+  activeDesigner = null;
+  document.querySelectorAll('.designer-card').forEach(el => el.classList.remove('selected'));
+  document.getElementById('designer-detail').innerHTML = '';
+}
+
+function goToDesigner(id) {
+  goToTab('graficy');
+  setTimeout(() => selectDesigner(id), 50);
+}
+
+function switchMode(mode, btn) {
+  document.querySelectorAll('.inner-tab').forEach(el => el.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('creative-section').style.display = mode === 'creative' ? 'block' : 'none';
+  document.getElementById('technical-section').style.display = mode === 'technical' ? 'block' : 'none';
+  if (mode === 'technical') renderTechTable();
+}
+
+function renderTechTable() {
+  const tech = DESIGNERS.filter(d => d.type === 'technical');
+  const rows = tech.map(d => {
+    const rrOk = d.revRate <= 1.5;
+    const otOk = d.onTime >= 90;
+    const overall = (rrOk && otOk) ? 'excellent' : (!rrOk || !otOk) && (d.revRate > 2 || d.onTime < 85) ? 'attention' : 'good';
+    return `<tr>
+      <td><strong>${d.name}</strong></td>
+      <td style="font-size:12px;color:var(--muted);">${d.role} · ${d.level}</td>
+      <td style="font-weight:700;color:${rrOk?'var(--accent3)':'var(--accent2)'};">${d.revRate} <span style="font-size:11px;color:var(--muted);font-weight:400;">/ cel ≤1,5</span></td>
+      <td style="font-weight:700;color:${otOk?'var(--accent3)':'var(--accent2)'};">${d.onTime}% <span style="font-size:11px;color:var(--muted);font-weight:400;">/ cel ≥90%</span></td>
+      <td style="font-weight:700;color:var(--accent3);">${d.repeat}%</td>
+      <td><span class="tag ${overall}">${overall==='excellent'?'✓ Excellent':overall==='good'?'~ Good':'⚠ Attention'}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tech-table').innerHTML =
+    `<thead><tr><th>Grafik</th><th>Rola</th><th>Revision Rate</th><th>On-Time Rate</th><th>Repeat Rate</th><th>Status</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+// ══════════════════════════════════════════════
+//  DEAL LOOKUP
+// ══════════════════════════════════════════════
+function lookupDeal() {
+  const raw = document.getElementById('lookup-input').value.trim().replace(/[\[\]\s]/g,'');
+  const container = document.getElementById('lookup-result');
+  if (!raw) { container.innerHTML = ''; return; }
+
+  const deal = DEALS.find(d => d.id === raw);
+  if (!deal) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>Nie znaleziono szansy <strong>[${raw}]</strong> w danych demo.</p></div>`;
+    return;
+  }
+
+  const crewHtml = deal.crew.map(c => {
+    const d = byId(c.id);
+    if (!d) return '';
+    const catWR = d.cat[deal.cat] ?? d.winRate;
+    const mktWR = d.mkt[deal.mkt] ?? d.winRate;
+    const rTag = c.role === 'LEAD' ? '<span class="tag lead">LEAD</span>' : '<span class="tag support">SUPPORT</span>';
+    return `<div class="crew-row">
+      <div class="crew-name">${d.name}</div>
+      <div class="crew-role-col">${rTag}</div>
+      <div class="crew-stats">
+        <div class="cs-item"><div class="lbl">Win Rate ${deal.cat}</div><div class="val" style="color:${wrColor(catWR)};">${catWR}%</div></div>
+        <div class="cs-item"><div class="lbl">Win Rate ${deal.mkt}</div><div class="val" style="color:${wrColor(mktWR)};">${mktWR}%</div></div>
+        <div class="cs-item"><div class="lbl">Win Rate ogólny</div><div class="val" style="color:${wrColor(d.winRate)};">${d.winRate}%</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const lossNote = deal.why
+    ? `<div style="margin-top:16px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.3);border-radius:10px;padding:14px 18px;font-size:13px;">
+        <strong style="color:var(--accent2);">Powód przegranej: ${deal.why}</strong>
+        <span style="color:var(--muted);display:block;margin-top:3px;">Jeśli powód leży poza kreacją (Cena, Zakres), win rate grafika nie jest obciążony.</span>
+       </div>` : '';
+
+  container.innerHTML = `
+    <div class="lookup-result">
+      <div class="lr-header">
+        <div>
+          <div class="lr-name">[${deal.id}] ${deal.name}</div>
+          <div class="lr-meta">${deal.cat} · ${deal.mkt} · ${deal.date} · <strong>${fmtPLN(deal.value)} PLN</strong></div>
+        </div>
+        ${statusTag(deal)}
+      </div>
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Zespół projektowy</div>
+      ${crewHtml}
+      ${lossNote}
+    </div>`;
+}
+
+// ══════════════════════════════════════════════
+//  FILTRY
+// ══════════════════════════════════════════════
+function populateFilters() {
+  const sel = document.getElementById('f-designer');
+  DESIGNERS.filter(d=>d.type==='creative').forEach(d => {
+    const o = document.createElement('option');
+    o.value = d.id; o.textContent = d.name;
+    sel.appendChild(o);
+  });
+  applyFilters();
+}
+
+function applyFilters() {
+  const fD = document.getElementById('f-designer').value;
+  const fC = document.getElementById('f-cat').value;
+  const fM = document.getElementById('f-market').value;
+  const fS = document.getElementById('f-status').value;
+
+  let res = DEALS;
+  if (fD) res = res.filter(d => d.crew.some(c=>c.id===fD));
+  if (fC) res = res.filter(d => d.cat === fC);
+  if (fM) res = res.filter(d => d.mkt === fM);
+  if (fS) res = res.filter(d => d.status === fS);
+
+  const won = res.filter(d=>d.status==='won').length;
+  const rev = res.filter(d=>d.status==='won').reduce((s,d)=>s+d.value,0);
+  document.getElementById('filter-info').textContent =
+    `${res.length} deal${res.length===1?'':'i'} · ${won} won · ${res.length-won} lost · Revenue: ${fmtPLN(rev)} PLN`;
+
+  const rows = res.map(deal => {
+    const lead = deal.crew.find(c=>c.role==='LEAD');
+    const leadName = lead ? (byId(lead.id)?.name||'—') : '—';
+    return `<tr>
+      <td style="font-family:monospace;font-size:12px;color:var(--muted);">[${deal.id}]</td>
+      <td><strong>${deal.name}</strong></td>
+      <td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:4px;">${deal.cat}</span></td>
+      <td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:4px;">${deal.mkt}</span></td>
+      <td>${leadName}</td>
+      <td style="color:var(--muted);">${deal.crew.length}</td>
+      <td>${statusTag(deal)}</td>
+      <td style="font-weight:700;text-align:right;">${fmtPLN(deal.value)} PLN</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">Brak wyników</td></tr>`;
+
+  document.getElementById('filter-table').innerHTML =
+    `<thead><tr><th>Deal ID</th><th>Projekt</th><th>Kategoria</th><th>Rynek</th><th>LEAD</th><th>Graficy</th><th>Status</th><th style="text-align:right;">Wartość</th></tr></thead><tbody>${rows}</tbody>`;
+}
+
+function resetFilters() {
+  ['f-designer','f-cat','f-market','f-status'].forEach(id => { document.getElementById(id).value = ''; });
+  applyFilters();
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+renderDashboard();
+renderDesignerGrid();
+populateFilters();
+</script>
+</body>
+</html>
