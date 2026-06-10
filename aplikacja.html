@@ -3,673 +3,822 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FYNK · System Oceny Grafika</title>
+<title>FYNK · Ocena Grafika v2</title>
 <style>
-:root {
-  --bg: #0f1117; --surface: #1a1d27; --surface2: #22263a;
-  --accent: #6c63ff; --accent2: #ff6b6b; --accent3: #43d9a2; --accent4: #ffd166;
-  --text: #e8eaf0; --muted: #7b829a; --border: #2e3248;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-/* APP BAR */
-.app-bar {
-  position: sticky; top: 0; z-index: 200;
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  padding: 0 32px; display: flex; align-items: center; gap: 32px; height: 56px;
-}
-.app-logo { font-size: 18px; font-weight: 800; white-space: nowrap; }
-.app-logo .sub { color: var(--muted); font-weight: 400; margin-left: 4px; font-size: 14px; }
-.app-tabs { display: flex; gap: 4px; flex: 1; }
-.tab-btn {
-  background: none; border: none; color: var(--muted);
-  font-size: 14px; font-weight: 500; padding: 8px 16px;
-  border-radius: 8px; cursor: pointer; transition: all .15s;
-}
-.tab-btn:hover { background: var(--surface2); color: var(--text); }
-.tab-btn.active { background: rgba(108,99,255,.15); color: var(--accent); }
-.app-badge { font-size: 11px; color: var(--muted); white-space: nowrap; background: var(--surface2); padding: 4px 10px; border-radius: 20px; }
-
-/* LAYOUT */
-.app-main { padding: 32px; max-width: 1200px; margin: 0 auto; }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
-.section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; }
-.section-block { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 24px; }
-.section-block h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
-
-/* METRIC CARDS */
-.metric-row { display: flex; gap: 16px; margin-bottom: 24px; }
-.metric-card { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
-.metric-card .val { font-size: 30px; font-weight: 800; }
-.metric-card .lbl { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
-.metric-card .delta { font-size: 12px; margin-top: 8px; }
-.delta.up { color: var(--accent3); }
-.delta.dn { color: var(--accent2); }
-
-/* TABLE */
-table { width: 100%; border-collapse: collapse; }
-th { text-align: left; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding: 10px 16px; border-bottom: 1px solid var(--border); }
-td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-tr:last-child td { border-bottom: none; }
-.clickable-row { cursor: pointer; }
-.clickable-row:hover td { background: rgba(108,99,255,.04); }
-
-/* TAGS */
-.tag { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-.tag.won { background: rgba(67,217,162,.15); color: var(--accent3); }
-.tag.lost { background: rgba(255,107,107,.15); color: var(--accent2); }
-.tag.lead { background: rgba(108,99,255,.2); color: var(--accent); }
-.tag.support { background: var(--surface2); color: var(--muted); }
-.tag.excellent { background: rgba(67,217,162,.15); color: var(--accent3); }
-.tag.good { background: rgba(255,209,102,.15); color: var(--accent4); }
-.tag.attention { background: rgba(255,107,107,.15); color: var(--accent2); }
-
-/* WIN RATE BAR */
-.wr-bar { display: flex; align-items: center; gap: 8px; }
-.wr-track { width: 80px; background: var(--surface2); border-radius: 3px; height: 6px; flex-shrink: 0; }
-.wr-fill { height: 6px; border-radius: 3px; }
-
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#222637;--accent:#6c63ff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#ffd166;--text:#e8eaf0;--muted:#7b829a;--border:#2e3248;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+button{cursor:pointer;font-family:inherit;}
+/* ROLE PICKER */
+#role-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;}
+.role-wrap{max-width:520px;width:100%;text-align:center;}
+.role-logo{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:28px;}
+.role-wrap h1{font-size:30px;font-weight:800;margin-bottom:8px;}
+.role-sub{font-size:14px;color:var(--muted);margin-bottom:36px;}
+.role-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.role-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 16px;text-align:left;cursor:pointer;transition:all .2s;}
+.role-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 20px rgba(108,99,255,.15);}
+.role-icon{font-size:28px;margin-bottom:10px;}
+.role-name{font-size:15px;font-weight:700;margin-bottom:4px;}
+.role-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+/* MAIN APP */
+#app{display:none;min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.topbar-logo{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);}
+.topbar-role{background:rgba(108,99,255,.15);color:var(--accent);font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;border:1px solid rgba(108,99,255,.3);}
+.topbar-tabs{display:flex;gap:4px;margin-left:auto;}
+.tab-btn{background:none;border:none;color:var(--muted);font-size:13px;font-weight:600;padding:6px 14px;border-radius:8px;transition:all .2s;}
+.tab-btn.active{background:rgba(108,99,255,.15);color:var(--accent);}
+.tab-btn:hover:not(.active){color:var(--text);}
+.switch-role-btn{background:none;border:1px solid var(--border);color:var(--muted);font-size:12px;padding:4px 10px;border-radius:8px;margin-left:8px;}
+.switch-role-btn:hover{color:var(--text);border-color:var(--muted);}
+.main{padding:32px 24px;max-width:1100px;margin:0 auto;}
+/* CARDS */
+.section-title{font-size:20px;font-weight:800;margin-bottom:20px;}
+.section-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;}
+.card+.card{margin-top:12px;}
+/* DASHBOARD GRID */
+.designer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+.designer-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:all .2s;}
+.designer-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.dc-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.dc-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;}
+.dc-name{font-size:16px;font-weight:700;}
+.dc-role{font-size:12px;color:var(--muted);}
+.dc-reactions{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;}
+.dc-react{background:var(--surface2);border-radius:8px;padding:6px 4px;text-align:center;}
+.dc-react-icon{font-size:16px;display:block;margin-bottom:2px;}
+.dc-react-label{font-size:10px;color:var(--muted);display:block;}
+.dc-react-val{font-size:18px;font-weight:800;}
+.dc-react-val.won{color:var(--accent3);}
+.dc-react-val.inf{color:var(--accent4);}
+.dc-react-val.lost{color:var(--accent2);}
+.dc-react-val.ns{color:var(--muted);}
+.dc-expert{display:flex;gap:8px;flex-wrap:wrap;}
+.dc-dim{background:var(--surface2);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--muted);}
+.dc-dim span{color:var(--text);font-weight:700;}
+.expert-badge{display:flex;align-items:center;gap:6px;margin-top:10px;}
+.expert-score{font-size:13px;color:var(--muted);}
+.expert-score strong{color:var(--accent4);font-size:18px;}
+/* TRAJECTORY CHART */
+.traj-wrap{margin-top:16px;}
+.traj-label{font-size:11px;color:var(--muted);margin-bottom:6px;}
+svg.traj{width:100%;height:60px;}
+/* FORMS */
+.form-group{margin-bottom:18px;}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--muted);}
+input[type=text],textarea,select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;}
+input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);}
+textarea{resize:vertical;min-height:80px;}
+.range-wrap{display:flex;align-items:center;gap:12px;}
+input[type=range]{flex:1;accent-color:var(--accent);}
+.range-val{width:28px;text-align:center;font-weight:700;color:var(--accent4);font-size:16px;}
+.btn{background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:700;padding:10px 20px;border-radius:10px;transition:all .2s;}
+.btn:hover{opacity:.85;transform:translateY(-1px);}
+.btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn.danger{background:rgba(255,107,107,.15);color:var(--accent2);border:1px solid rgba(255,107,107,.3);}
+.btn-row{display:flex;gap:10px;margin-top:20px;}
+/* PROJECT LIST */
+.proj-list{display:flex;flex-direction:column;gap:10px;}
+.proj-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;display:flex;align-items:center;gap:14px;}
+.proj-item.active-proj{border-color:rgba(67,217,162,.3);}
+.proj-status{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.proj-status.open{background:var(--accent3);box-shadow:0 0 8px rgba(67,217,162,.4);}
+.proj-status.closed{background:var(--muted);}
+.proj-info{flex:1;}
+.proj-name{font-size:15px;font-weight:700;}
+.proj-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+.proj-crew{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+.crew-tag{font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;color:var(--muted);}
+.close-btn{background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);color:var(--accent);font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;white-space:nowrap;}
+.close-btn:hover{background:var(--accent);color:#fff;}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:500px;width:100%;max-height:90vh;overflow-y:auto;}
+.modal h3{font-size:18px;font-weight:800;margin-bottom:4px;}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:22px;}
+.reaction-group{margin-bottom:18px;}
+.reaction-group-name{font-size:14px;font-weight:700;margin-bottom:8px;}
+.reaction-options{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.react-opt{background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer;transition:all .2s;}
+.react-opt:hover{border-color:var(--muted);}
+.react-opt.selected-won{border-color:var(--accent3);background:rgba(67,217,162,.1);}
+.react-opt.selected-inf{border-color:var(--accent4);background:rgba(255,209,102,.1);}
+.react-opt.selected-lost{border-color:var(--accent2);background:rgba(255,107,107,.1);}
+.react-opt.selected-ns{border-color:var(--muted);background:rgba(123,130,154,.1);}
+.react-icon{font-size:20px;display:block;margin-bottom:4px;}
+.react-text{font-size:11px;font-weight:600;}
+/* GRAFIK VIEW */
+.grafik-selector{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.grafik-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;color:var(--muted);}
+.grafik-btn.active{background:rgba(108,99,255,.15);border-color:var(--accent);color:var(--accent);}
+.grafik-btn:hover:not(.active){color:var(--text);}
+.grafik-profile{margin-bottom:24px;}
+.grafik-profile-name{font-size:24px;font-weight:800;}
+.grafik-profile-role{font-size:14px;color:var(--muted);}
+.months-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:24px;}
+.month-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.month-label{font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;}
+.month-reactions{display:flex;gap:8px;margin-bottom:8px;}
+.mreact{display:flex;align-items:center;gap:4px;font-size:13px;}
+.month-expert{font-size:12px;color:var(--muted);}
+.month-expert strong{color:var(--accent4);}
+/* EVAL FORM */
+.eval-designer-select{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.eval-month-select{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.eval-select-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:600;color:var(--muted);}
+.eval-select-btn.active{background:rgba(108,99,255,.15);border-color:var(--accent);color:var(--accent);}
 /* ALERTS */
-.alert-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; display: flex; align-items: flex-start; gap: 16px; margin-bottom: 10px; }
-.alert-card.warn { border-color: rgba(255,107,107,.4); background: rgba(255,107,107,.05); }
-.alert-card.ok { border-color: rgba(67,217,162,.4); background: rgba(67,217,162,.05); }
-.alert-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
-.alert-text h4 { font-size: 14px; font-weight: 600; }
-.alert-text p { font-size: 13px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
-
-/* DESIGNER GRID */
-.designer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin-bottom: 24px; }
-.designer-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; cursor: pointer; transition: all .2s; }
-.designer-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(108,99,255,.12); }
-.designer-card.selected { border-color: var(--accent); background: rgba(108,99,255,.06); }
-.dc-name { font-size: 17px; font-weight: 700; margin-bottom: 2px; }
-.dc-role { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
-.dc-metrics { display: flex; gap: 0; }
-.dc-m { flex: 1; }
-.dc-m .val { font-size: 20px; font-weight: 800; }
-.dc-m .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 1px; }
-
-/* DESIGNER DETAIL */
-.designer-detail { background: var(--surface); border: 1px solid var(--accent); border-radius: 16px; padding: 32px; margin-top: 0; animation: slideDown .25s ease; }
-@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-.dd-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
-.dd-name { font-size: 24px; font-weight: 800; }
-.dd-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
-.dd-metrics { display: flex; gap: 32px; margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-.dd-m .val { font-size: 28px; font-weight: 800; }
-.dd-m .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
-.dd-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 24px; }
-.bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
-.bar-lbl { font-size: 13px; width: 90px; flex-shrink: 0; }
-.bar-track { flex: 1; background: var(--surface2); border-radius: 3px; height: 8px; }
-.bar-fill { height: 8px; border-radius: 3px; }
-.bar-pct { font-size: 12px; font-weight: 700; width: 32px; text-align: right; }
-.dd-insight { background: rgba(108,99,255,.08); border: 1px solid rgba(108,99,255,.2); border-radius: 10px; padding: 14px 18px; font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
-.close-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; transition: all .15s; }
-.close-btn:hover { color: var(--text); }
-
-/* INNER TABS */
-.inner-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
-.inner-tab { background: none; border: 1px solid var(--border); color: var(--muted); font-size: 13px; padding: 6px 16px; border-radius: 8px; cursor: pointer; transition: all .15s; }
-.inner-tab.active { background: rgba(108,99,255,.15); border-color: var(--accent); color: var(--accent); }
-
-/* DEAL LOOKUP */
-.lookup-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; max-width: 580px; }
-.lookup-row { display: flex; gap: 10px; }
-.lookup-input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; color: var(--text); font-size: 16px; font-family: monospace; outline: none; transition: border-color .2s; }
-.lookup-input:focus { border-color: var(--accent); }
-.lookup-btn { background: var(--accent); border: none; color: white; padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
-.lookup-hint { margin-top: 14px; font-size: 12px; color: var(--muted); line-height: 1.8; }
-.lookup-result { margin-top: 24px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
-.lr-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-.lr-name { font-size: 20px; font-weight: 700; }
-.lr-meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
-.crew-row { background: var(--surface2); border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
-.crew-name { font-size: 15px; font-weight: 700; width: 140px; flex-shrink: 0; }
-.crew-role-col { width: 80px; flex-shrink: 0; }
-.crew-stats { flex: 1; display: flex; gap: 28px; }
-.cs-item .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-.cs-item .val { font-size: 18px; font-weight: 800; margin-top: 2px; }
-
-/* FILTRY */
-.filter-bar { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 20px; }
-.fg { display: flex; flex-direction: column; gap: 5px; }
-.fg label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
-.fg select { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 14px; outline: none; min-width: 130px; }
-.fg select:focus { border-color: var(--accent); }
-.filter-btn { background: var(--accent); border: none; color: white; padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
-.filter-reset { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 9px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; }
-.filter-info { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
-
-/* LOSS CHART */
-.loss-chart { display: flex; gap: 20px; align-items: flex-end; height: 140px; margin: 4px 0 12px; }
-.lc-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-.lc-bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; }
-.lc-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; }
-.lc-pct { font-size: 18px; font-weight: 800; }
-.lc-lbl { font-size: 11px; color: var(--muted); text-align: center; }
-
-/* EMPTY STATE */
-.empty-state { text-align: center; padding: 40px 24px; color: var(--muted); }
-.empty-state .icon { font-size: 36px; margin-bottom: 10px; }
-
-/* TWO COL GRID */
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
-
-@media (max-width: 800px) {
-  .app-main { padding: 16px; }
-  .metric-row { flex-direction: column; }
-  .two-col { grid-template-columns: 1fr; }
-  .dd-two-col { grid-template-columns: 1fr; }
-  .designer-grid { grid-template-columns: 1fr; }
-  .crew-row { flex-direction: column; align-items: flex-start; }
+.alert{border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:16px;}
+.alert.info{background:rgba(108,99,255,.1);border:1px solid rgba(108,99,255,.2);color:var(--accent);}
+.alert.warn{background:rgba(255,209,102,.1);border:1px solid rgba(255,209,102,.2);color:var(--accent4);}
+.alert.success{background:rgba(67,217,162,.1);border:1px solid rgba(67,217,162,.2);color:var(--accent3);}
+/* WINRATE BAR */
+.winrate-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.wr-name{font-size:13px;font-weight:600;width:80px;flex-shrink:0;}
+.wr-bar-wrap{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+.wr-bar{height:100%;border-radius:4px;background:var(--accent3);transition:width .4s;}
+.wr-val{font-size:12px;color:var(--muted);width:36px;text-align:right;flex-shrink:0;}
+/* MONTH FILTER */
+.month-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.mf-btn{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--muted);}
+.mf-btn.active{background:rgba(108,99,255,.15);border-color:var(--accent);color:var(--accent);}
+/* HIDDEN */
+.hidden{display:none!important;}
+/* RESPONSIVE */
+@media(max-width:600px){
+  .role-cards{grid-template-columns:1fr;}
+  .dc-reactions{grid-template-columns:repeat(2,1fr);}
+  .reaction-options{grid-template-columns:repeat(2,1fr);}
+  .topbar-tabs{display:none;}
+  .main{padding:16px;}
 }
 </style>
 </head>
 <body>
 
-<header class="app-bar">
-  <div class="app-logo">FYNK<span class="sub">/ Graficy</span></div>
-  <nav class="app-tabs">
-    <button class="tab-btn active" data-tab="dashboard" onclick="showTab('dashboard',this)">Dashboard</button>
-    <button class="tab-btn" data-tab="graficy" onclick="showTab('graficy',this)">Graficy</button>
-    <button class="tab-btn" data-tab="lookup" onclick="showTab('lookup',this)">Deal Lookup</button>
-    <button class="tab-btn" data-tab="filtry" onclick="showTab('filtry',this)">Filtry</button>
-  </nav>
-  <div class="app-badge">Dane przykładowe · 2026</div>
-</header>
-
-<main class="app-main">
-
-  <!-- ── DASHBOARD ── -->
-  <section id="tab-dashboard" class="tab-panel active">
-    <div class="section-title">Dashboard · Maj 2026</div>
-    <div class="metric-row">
-      <div class="metric-card">
-        <div class="val" style="color:var(--accent3);">67%</div>
-        <div class="lbl">Team Win Rate</div>
-        <div class="delta up">▲ +3% vs kwiecień</div>
+<!-- ROLE PICKER -->
+<div id="role-screen">
+  <div class="role-wrap">
+    <div class="role-logo">FYNK · Dział Kreacji · 2026</div>
+    <h1>System Oceny<br>Grafika Kreatywnego</h1>
+    <p class="role-sub">Wybierz swoją rolę, aby zobaczyć odpowiedni widok</p>
+    <div class="role-cards">
+      <div class="role-card" onclick="selectRole('manager')">
+        <div class="role-icon">📊</div>
+        <div class="role-name">Manager</div>
+        <div class="role-desc">Pełny dashboard, ocena ekspercka, trajektorie, eksport danych kadrowych</div>
       </div>
-      <div class="metric-card">
-        <div class="val" style="color:var(--accent);">713k</div>
-        <div class="lbl">Revenue YTD (PLN)</div>
-        <div class="delta up">10 wygranych dealów</div>
+      <div class="role-card" onclick="selectRole('account')">
+        <div class="role-icon">⚡</div>
+        <div class="role-name">Account</div>
+        <div class="role-desc">Szybkie zamknięcie projektu i ocena reakcji klienta — max 3 kliknięcia</div>
       </div>
-      <div class="metric-card">
-        <div class="val" style="color:var(--accent4);">8</div>
-        <div class="lbl">Otwarte szanse</div>
-        <div class="delta" style="color:var(--muted);">w toku</div>
+      <div class="role-card" onclick="selectRole('sandra')">
+        <div class="role-icon">🎨</div>
+        <div class="role-name">Sandra</div>
+        <div class="role-desc">Ocena ekspercka zespołu i podgląd wyników wszystkich grafików</div>
       </div>
-      <div class="metric-card">
-        <div class="val" style="color:var(--accent3); font-size:22px;">Jeroen V.</div>
-        <div class="lbl">Top Win Rate</div>
-        <div class="delta up">77% · Packaging DE 81%</div>
+      <div class="role-card" onclick="selectRole('grafik')">
+        <div class="role-icon">👤</div>
+        <div class="role-name">Grafik</div>
+        <div class="role-desc">Moje wyniki — win rate, oceny eksperckie, trajektoria 6 miesięcy</div>
       </div>
     </div>
+  </div>
+</div>
 
-    <div class="two-col">
-      <div class="section-block" style="margin-bottom:0;">
-        <h3>Ranking — Win Rate (Tryb A · Kreatywni)</h3>
-        <table id="ranking-table"></table>
-      </div>
-      <div class="section-block" style="margin-bottom:0;">
-        <h3>Powody Strat</h3>
-        <div class="loss-chart" id="loss-chart"></div>
-        <p style="font-size:12px; color:var(--muted); margin-top:8px;">5 zamkniętych szans LOST · Maj 2026</p>
-      </div>
-    </div>
+<!-- MAIN APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">FYNK · Kreacja</div>
+    <div class="topbar-role" id="role-badge"></div>
+    <div class="topbar-tabs" id="nav-tabs"></div>
+    <button class="switch-role-btn" onclick="switchRole()">Zmień rolę</button>
+  </div>
+  <div class="main" id="main-content"></div>
+</div>
 
-    <div style="height:24px;"></div>
-    <div class="section-block">
-      <h3>Alerty Miesiąca</h3>
-      <div id="alerts"></div>
-    </div>
-  </section>
-
-  <!-- ── GRAFICY ── -->
-  <section id="tab-graficy" class="tab-panel">
-    <div class="section-title">Graficy</div>
-    <div class="inner-tabs">
-      <button class="inner-tab active" onclick="switchMode('creative',this)">🎨 Kreatywni (Tryb A)</button>
-      <button class="inner-tab" onclick="switchMode('technical',this)">⚙️ Techniczni (Tryb B)</button>
-    </div>
-    <div id="creative-section">
-      <div class="designer-grid" id="designer-grid"></div>
-      <div id="designer-detail"></div>
-    </div>
-    <div id="technical-section" style="display:none;">
-      <div class="section-block"><table id="tech-table"></table></div>
-    </div>
-  </section>
-
-  <!-- ── DEAL LOOKUP ── -->
-  <section id="tab-lookup" class="tab-panel">
-    <div class="section-title">Deal Lookup</div>
-    <div class="lookup-box">
-      <div style="font-size:16px; font-weight:700; margin-bottom:14px;">Wklej numer szansy LiveSpace</div>
-      <div class="lookup-row">
-        <input class="lookup-input" id="lookup-input" type="text" placeholder="np. 48667" oninput="lookupDeal()">
-        <button class="lookup-btn" onclick="lookupDeal()">Szukaj</button>
-      </div>
-      <div class="lookup-hint">
-        Dostępne ID (demo): <span style="font-family:monospace; color:var(--text);">48667 · 48890 · 49123 · 49234 · 49456 · 49578 · 49690 · 49800 · 49910 · 50012 · 50134 · 50256 · 50378 · 50489 · 50600</span>
-      </div>
-    </div>
-    <div id="lookup-result"></div>
-  </section>
-
-  <!-- ── FILTRY ── -->
-  <section id="tab-filtry" class="tab-panel">
-    <div class="section-title">Filtry</div>
-    <div class="filter-bar">
-      <div class="fg"><label>Grafik</label><select id="f-designer"><option value="">Wszyscy</option></select></div>
-      <div class="fg"><label>Kategoria</label>
-        <select id="f-cat">
-          <option value="">Wszystkie</option>
-          <option>Packaging</option><option>Branding</option><option>POS</option><option>KV</option><option>Campaign</option>
-        </select>
-      </div>
-      <div class="fg"><label>Rynek</label>
-        <select id="f-market"><option value="">Wszystkie</option><option>PL</option><option>DE</option></select>
-      </div>
-      <div class="fg"><label>Status</label>
-        <select id="f-status"><option value="">Wszystkie</option><option value="won">Won</option><option value="lost">Lost</option></select>
-      </div>
-      <button class="filter-btn" onclick="applyFilters()">Filtruj</button>
-      <button class="filter-reset" onclick="resetFilters()">Reset</button>
-    </div>
-    <div class="filter-info" id="filter-info"></div>
-    <div class="section-block"><table id="filter-table"></table></div>
-  </section>
-
-</main>
+<!-- MODAL -->
+<div id="modal" class="modal-overlay hidden">
+  <div class="modal" id="modal-inner"></div>
+</div>
 
 <script>
-// ══════════════════════════════════════════════
-//  DATA
-// ══════════════════════════════════════════════
+// ===================== DATA =====================
 const DESIGNERS = [
-  { id:'sandra',   name:'Sandra K.',    role:'Creative Lead',       level:'SENIOR', type:'creative', rate:75, winRate:74, revenue:380000, rph:3200, deals:24,
-    cat:{Packaging:72,Branding:82,POS:68,KV:73,Campaign:70}, mkt:{PL:70,DE:82},
-    insight:'Dominuje na rynku DE — 82% win rate vs 70% w PL. Najsilniejsza w Branding (82%). Naturalny LEAD do projektów premium DE.' },
-  { id:'michal',   name:'Michał Kot',   role:'Creative Designer',   level:'SENIOR', type:'creative', rate:51, winRate:71, revenue:312000, rph:2900, deals:20,
-    cat:{Packaging:68,Branding:71,POS:60,KV:65,Campaign:65}, mkt:{PL:68,DE:80},
-    insight:'Najsilniejszy w Packaging DE (80%). Przy przetargach DE packaging — priorytet LEAD.' },
-  { id:'jeroen',   name:'Jeroen V.',    role:'Creative Designer',   level:'SENIOR', type:'creative', rate:85, winRate:77, revenue:420000, rph:3500, deals:17,
-    cat:{Packaging:81,Branding:75,POS:70,KV:80,Campaign:78}, mkt:{PL:70,DE:85},
-    insight:'Najwyższy win rate w zespole. Jedyna osoba >80% w Packaging DE. Priorytet LEAD do dużych przetargów europejskich.' },
-  { id:'kornelia', name:'Kornelia W.',  role:'Creative Designer',   level:'MID',    type:'creative', rate:45, winRate:65, revenue:287000, rph:2600, deals:22,
-    cat:{Packaging:65,Branding:70,POS:62,KV:60,Campaign:63}, mkt:{PL:65,DE:66},
-    insight:'Stabilna we wszystkich kategoriach. Branding (70%) to jej strongest area. Dobra jako SUPPORT do dużych projektów.' },
-  { id:'julia',    name:'Julia Ż.',     role:'Creative Designer',   level:'MID',    type:'creative', rate:48, winRate:69, revenue:241000, rph:2500, deals:19,
-    cat:{Packaging:64,Branding:74,POS:65,KV:68,Campaign:70}, mkt:{PL:72,DE:62},
-    insight:'Wygrywa Branding PL (74%) i Campaign (70%). Słabszy wynik na rynku DE — wskazać jako LEAD głównie do projektów polskich.' },
-  { id:'klaudia',  name:'Klaudia S.',   role:'Creative Designer',   level:'MID',    type:'creative', rate:43, winRate:58, revenue:215000, rph:2100, deals:18,
-    cat:{Packaging:55,Branding:62,POS:58,KV:57,Campaign:55}, mkt:{PL:60,DE:54},
-    insight:'Win rate poniżej średniej (58% vs 67%). Packaging (55%) wymaga pracy. Zalecana rola SUPPORT przed kolejnym LEAD assignment.' },
-  { id:'katarzyna',name:'Katarzyna D.', role:'Creative Designer',   level:'MID',    type:'creative', rate:46, winRate:62, revenue:195000, rph:2300, deals:16,
-    cat:{Packaging:60,Branding:66,POS:63,KV:58,Campaign:62}, mkt:{PL:65,DE:55},
-    insight:'Dobry wynik w Branding PL (66%). Wymaga wsparcia na rynku DE (55%). Wskazana jako LEAD do średnich projektów PL.' },
-  { id:'natalia',  name:'Natalia P.',   role:'Creative Designer',   level:'JR',     type:'creative', rate:40, winRate:55, revenue:168000, rph:1900, deals:15,
-    cat:{Packaging:52,Branding:60,POS:55,KV:54,Campaign:50}, mkt:{PL:57,DE:50},
-    insight:'Najniższy win rate w grupie (55%). Wskazana rotacja SUPPORT i mentoring. Potencjał w Branding (60%). Nie przydzielać jako LEAD do DE.' },
-  { id:'kuba',   name:'Kuba M.',   role:'Technical Lead',     level:'SENIOR', type:'technical', revRate:1.2, onTime:94, repeat:87 },
-  { id:'filip',  name:'Filip B.',  role:'Technical Designer', level:'MID',    type:'technical', revRate:1.8, onTime:88, repeat:82 },
-  { id:'maja',   name:'Maja K.',   role:'Technical Designer', level:'MID',    type:'technical', revRate:1.3, onTime:92, repeat:85 },
-  { id:'bartek', name:'Bartek W.', role:'Technical Designer', level:'JR',     type:'technical', revRate:2.1, onTime:85, repeat:79 },
-  { id:'marta',  name:'Marta C.',  role:'Technical Designer', level:'JR',     type:'technical', revRate:1.4, onTime:91, repeat:84 },
+  {id:'sandra', name:'Sandra', role:'Creative Coordinator', exp:'~10 lat', color:'#6c63ff'},
+  {id:'michal', name:'Michał', role:'Senior Creative', exp:'~10 lat', color:'#43d9a2'},
+  {id:'klaudia', name:'Klaudia', role:'Senior Creative', exp:'~10 lat', color:'#ffd166'},
+  {id:'jero', name:'Jero', role:'Senior Strategy Creative', exp:'~30 lat', color:'#ff9f43'},
+  {id:'kasia', name:'Kasia', role:'Senior Creative', exp:'~15 lat', color:'#a29bfe'},
+  {id:'natalia', name:'Natalia', role:'Strategy Creative', exp:'~6 lat', color:'#fd79a8'},
+  {id:'julka', name:'Julka', role:'Junior Creative', exp:'~8 msc', color:'#74b9ff'},
+  {id:'kornelia', name:'Kornelia', role:'Creative Designer', exp:'~4-5 lat', color:'#55efc4'},
 ];
 
-const DEALS = [
-  { id:'48667', name:'Dega-Rebranding',       status:'won',  why:null,            value:45000,  cat:'Branding', mkt:'PL', date:'2026-03-15', crew:[{id:'sandra',role:'LEAD'},{id:'michal',role:'SUPPORT'},{id:'klaudia',role:'SUPPORT'}] },
-  { id:'48890', name:'Müller-CV Relaunch',    status:'lost', why:'Kreacja',       value:38000,  cat:'Packaging',mkt:'DE', date:'2026-03-22', crew:[{id:'michal',role:'LEAD'},{id:'klaudia',role:'SUPPORT'}] },
-  { id:'49123', name:'Henkel-KV Winter',      status:'won',  why:null,            value:62000,  cat:'KV',       mkt:'DE', date:'2026-04-01', crew:[{id:'jeroen',role:'LEAD'},{id:'sandra',role:'SUPPORT'}] },
-  { id:'49234', name:'Kerrygold-Packaging',   status:'won',  why:null,            value:53000,  cat:'Packaging',mkt:'DE', date:'2026-04-08', crew:[{id:'michal',role:'LEAD'},{id:'kornelia',role:'SUPPORT'}] },
-  { id:'49456', name:'OBI-POS Summer',        status:'lost', why:'Cena',          value:28000,  cat:'POS',      mkt:'PL', date:'2026-04-14', crew:[{id:'julia',role:'LEAD'},{id:'klaudia',role:'SUPPORT'}] },
-  { id:'49578', name:'Danone-Rebranding',     status:'won',  why:null,            value:71000,  cat:'Branding', mkt:'PL', date:'2026-04-20', crew:[{id:'sandra',role:'LEAD'}] },
-  { id:'49690', name:'Nestlé-Campaign Q1',    status:'won',  why:null,            value:89000,  cat:'Campaign', mkt:'PL', date:'2026-04-28', crew:[{id:'jeroen',role:'LEAD'},{id:'julia',role:'SUPPORT'},{id:'kornelia',role:'SUPPORT'}] },
-  { id:'49800', name:'Lidl-Packaging',        status:'lost', why:'Kreacja',       value:34000,  cat:'Packaging',mkt:'DE', date:'2026-05-05', crew:[{id:'natalia',role:'LEAD'},{id:'klaudia',role:'SUPPORT'}] },
-  { id:'49910', name:'Unilever-Rebranding',   status:'won',  why:null,            value:95000,  cat:'Branding', mkt:'DE', date:'2026-05-09', crew:[{id:'michal',role:'LEAD'},{id:'sandra',role:'SUPPORT'}] },
-  { id:'50012', name:'Biedronka-KV',          status:'lost', why:'Cena',          value:22000,  cat:'KV',       mkt:'PL', date:'2026-05-12', crew:[{id:'katarzyna',role:'LEAD'},{id:'julia',role:'SUPPORT'}] },
-  { id:'50134', name:'Carrefour-POS',         status:'won',  why:null,            value:41000,  cat:'POS',      mkt:'PL', date:'2026-05-15', crew:[{id:'kornelia',role:'LEAD'},{id:'natalia',role:'SUPPORT'}] },
-  { id:'50256', name:'P&G-Packaging Premium', status:'won',  why:null,            value:112000, cat:'Packaging',mkt:'DE', date:'2026-05-18', crew:[{id:'jeroen',role:'LEAD'},{id:'sandra',role:'SUPPORT'},{id:'michal',role:'SUPPORT'}] },
-  { id:'50378', name:'Hochland-Branding',     status:'won',  why:null,            value:67000,  cat:'Branding', mkt:'DE', date:'2026-05-21', crew:[{id:'julia',role:'LEAD'},{id:'katarzyna',role:'SUPPORT'}] },
-  { id:'50489', name:'Tymbark-Campaign',      status:'lost', why:'Zakres usług',  value:55000,  cat:'Campaign', mkt:'PL', date:'2026-05-23', crew:[{id:'natalia',role:'LEAD'},{id:'klaudia',role:'SUPPORT'},{id:'kornelia',role:'SUPPORT'}] },
-  { id:'50600', name:'Mars-Packaging',        status:'won',  why:null,            value:78000,  cat:'Packaging',mkt:'PL', date:'2026-05-26', crew:[{id:'sandra',role:'LEAD'},{id:'michal',role:'SUPPORT'}] },
+// PROJECTS — status: open | closed
+// reactions: map of designer_id → 'wybrany'|'wplynał'|'nie_wybrany'|'nie_wyslany'
+const MONTHS = ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06'];
+const MONTH_LABELS = {'2026-01':'Styczeń','2026-02':'Luty','2026-03':'Marzec','2026-04':'Kwiecień','2026-05':'Maj','2026-06':'Czerwiec'};
+
+let projects = [
+  // JANUARY
+  {id:'p01',name:'Graal — Rebranding Premium',month:'2026-01',status:'closed',fee:true,crew:['sandra','michal','klaudia'],reactions:{sandra:'wybrany',michal:'wplynął',klaudia:'nie_wybrany'}},
+  {id:'p02',name:'Nutrifit — Linia Sportowa',month:'2026-01',status:'closed',fee:true,crew:['michal','natalia','kornelia'],reactions:{michal:'wybrany',natalia:'wplynął',kornelia:'nie_wybrany'}},
+  {id:'p03',name:'Sante — Przekąski Zdrowe',month:'2026-01',status:'closed',fee:false,crew:['klaudia','jero','kasia'],reactions:{klaudia:'wybrany',jero:'nie_wybrany',kasia:'wplynął'}},
+  {id:'p04',name:'Bio Terra — Ekologiczne',month:'2026-01',status:'closed',fee:true,crew:['sandra','natalia','julka'],reactions:{sandra:'wplynął',natalia:'wybrany',julka:'nie_wyslany'}},
+  // FEBRUARY
+  {id:'p05',name:'Kraina Smaku — Dżemy',month:'2026-02',status:'closed',fee:true,crew:['michal','klaudia','sandra'],reactions:{michal:'wybrany',klaudia:'wplynął',sandra:'nie_wybrany'}},
+  {id:'p06',name:'Fresho — Soki Premium',month:'2026-02',status:'closed',fee:true,crew:['jero','kasia','natalia'],reactions:{jero:'nie_wybrany',kasia:'wybrany',natalia:'wplynął'}},
+  {id:'p07',name:'GreenBox — Suplementy',month:'2026-02',status:'closed',fee:false,crew:['sandra','kornelia','julka'],reactions:{sandra:'wybrany',kornelia:'nie_wybrany',julka:'nie_wyslany'}},
+  {id:'p08',name:'Pankracki — Masło Premium',month:'2026-02',status:'closed',fee:true,crew:['michal','kasia','jero'],reactions:{michal:'wybrany',kasia:'wplynął',jero:'nie_wybrany'}},
+  // MARCH
+  {id:'p09',name:'Delicja — Herbaty Ekspresowe',month:'2026-03',status:'closed',fee:true,crew:['sandra','michal','natalia'],reactions:{sandra:'wplynął',michal:'wybrany',natalia:'wplynął'}},
+  {id:'p10',name:'Alpenmilch — Seria Górska',month:'2026-03',status:'closed',fee:true,crew:['klaudia','kasia','kornelia'],reactions:{klaudia:'wybrany',kasia:'wplynął',kornelia:'nie_wybrany'}},
+  {id:'p11',name:'Vivo — Jogurty Owocowe',month:'2026-03',status:'closed',fee:false,crew:['jero','natalia','julka'],reactions:{jero:'nie_wybrany',natalia:'wybrany',julka:'wplynął'}},
+  {id:'p12',name:'FarmFresh — Sery Regionalne',month:'2026-03',status:'closed',fee:true,crew:['michal','sandra','klaudia'],reactions:{michal:'wybrany',sandra:'nie_wybrany',klaudia:'wplynął'}},
+  // APRIL
+  {id:'p13',name:'Złoty Kłos — Pieczywo',month:'2026-04',status:'closed',fee:true,crew:['michal','kasia','kornelia'],reactions:{michal:'wybrany',kasia:'wplynął',kornelia:'nie_wybrany'}},
+  {id:'p14',name:'Natura Dolce — Czekolady',month:'2026-04',status:'closed',fee:true,crew:['klaudia','natalia','jero'],reactions:{klaudia:'wybrany',natalia:'wplynął',jero:'nie_wybrany'}},
+  {id:'p15',name:'Vita Crunch — Płatki',month:'2026-04',status:'closed',fee:false,crew:['sandra','julka','kornelia'],reactions:{sandra:'wybrany',julka:'nie_wybrany',kornelia:'nie_wyslany'}},
+  {id:'p16',name:'ProWasser — Wody Funkcjonalne',month:'2026-04',status:'closed',fee:true,crew:['michal','natalia','kasia'],reactions:{michal:'wplynął',natalia:'wybrany',kasia:'wplynął'}},
+  // MAY
+  {id:'p17',name:'Solaro — Oliwy Premium',month:'2026-05',status:'closed',fee:true,crew:['sandra','michal','klaudia'],reactions:{sandra:'wybrany',michal:'wplynął',klaudia:'nie_wybrany'}},
+  {id:'p18',name:'HappyCat — Karmy',month:'2026-05',status:'closed',fee:true,crew:['natalia','julka','kornelia'],reactions:{natalia:'wybrany',julka:'wplynął',kornelia:'nie_wybrany'}},
+  {id:'p19',name:'Berg & Tal — Piwa Rzemieślnicze',month:'2026-05',status:'closed',fee:false,crew:['jero','kasia','michal'],reactions:{jero:'nie_wybrany',kasia:'wybrany',michal:'wplynął'}},
+  {id:'p20',name:'CreamLab — Kosmetyki',month:'2026-05',status:'closed',fee:true,crew:['klaudia','sandra','natalia'],reactions:{klaudia:'wplynął',sandra:'wybrany',natalia:'nie_wybrany'}},
+  // JUNE — active
+  {id:'p21',name:'Aura — Linia Wellness',month:'2026-06',status:'open',fee:true,crew:['michal','natalia','julka'],reactions:{}},
+  {id:'p22',name:'Bravo — Napoje Energetyczne',month:'2026-06',status:'open',fee:true,crew:['sandra','klaudia','kasia'],reactions:{}},
 ];
 
-// ══════════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════════
-const byId = id => DESIGNERS.find(d => d.id === id);
-const wrColor = p => p >= 70 ? 'var(--accent3)' : p >= 60 ? 'var(--accent4)' : 'var(--accent2)';
-const wrFill  = p => p >= 70 ? 'var(--accent3)' : p >= 60 ? 'var(--accent4)' : 'var(--accent2)';
-const fmtPLN  = n => n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(0)+'k' : n;
-const statusTag = d => d.status === 'won'
-  ? '<span class="tag won">WON</span>'
-  : `<span class="tag lost">LOST · ${d.why}</span>`;
-const dealsByDesigner = id => DEALS.filter(d => d.crew.some(c => c.id === id));
+// EXPERT EVALUATIONS — per month, per designer, per evaluator (manager/sandra)
+// dims: jakosc, samodzielnosc, wklad, rozwoj (1-5), note
+let evaluations = [
+  // JANUARY
+  {designer:'sandra',month:'2026-01',evaluator:'manager',jakosc:5,samodzielnosc:5,wklad:5,rozwoj:4,note:'Perfekcyjny miesiąc — Graal wygrany na bazie jej koncepcji'},
+  {designer:'sandra',month:'2026-01',evaluator:'sandra',jakosc:5,samodzielnosc:5,wklad:5,rozwoj:4,note:''},
+  {designer:'michal',month:'2026-01',evaluator:'manager',jakosc:5,samodzielnosc:5,wklad:3,rozwoj:4,note:'Nutrifit — klient wybrał jako jedyną bazę. Pracuje samodzielnie.'},
+  {designer:'michal',month:'2026-01',evaluator:'sandra',jakosc:5,samodzielnosc:5,wklad:3,rozwoj:4,note:''},
+  {designer:'klaudia',month:'2026-01',evaluator:'manager',jakosc:4,samodzielnosc:4,wklad:3,rozwoj:3,note:'Sante wygrany — delikatna estetyka trafiła w brief'},
+  {designer:'klaudia',month:'2026-01',evaluator:'sandra',jakosc:4,samodzielnosc:4,wklad:3,rozwoj:3,note:''},
+  {designer:'jero',month:'2026-01',evaluator:'manager',jakosc:3,samodzielnosc:4,wklad:4,rozwoj:2,note:'Design nie wybrany — feedback od klienta "za klasyczny". Cenne wsparcie strategiczne.'},
+  {designer:'jero',month:'2026-01',evaluator:'sandra',jakosc:3,samodzielnosc:4,wklad:4,rozwoj:2,note:''},
+  {designer:'kasia',month:'2026-01',evaluator:'manager',jakosc:3,samodzielnosc:3,wklad:2,rozwoj:3,note:'Sante — klient zainteresował się elementami. Wciąż trudność z nowymi brandami.'},
+  {designer:'kasia',month:'2026-01',evaluator:'sandra',jakosc:3,samodzielnosc:3,wklad:2,rozwoj:3,note:''},
+  {designer:'natalia',month:'2026-01',evaluator:'manager',jakosc:4,samodzielnosc:3,wklad:3,rozwoj:4,note:'Bio Terra wygrana — świeży kierunek, nowoczesna estetyka'},
+  {designer:'natalia',month:'2026-01',evaluator:'sandra',jakosc:4,samodzielnosc:3,wklad:3,rozwoj:4,note:''},
+  {designer:'julka',month:'2026-01',evaluator:'manager',jakosc:2,samodzielnosc:2,wklad:2,rozwoj:3,note:'Bio Terra — nie wysłana (wymagała poprawek). Wymaga nakierowania.'},
+  {designer:'julka',month:'2026-01',evaluator:'sandra',jakosc:2,samodzielnosc:2,wklad:2,rozwoj:3,note:'Widzę postęp względem próby w grudniu'},
+  {designer:'kornelia',month:'2026-01',evaluator:'manager',jakosc:2,samodzielnosc:2,wklad:2,rozwoj:2,note:'Nutrifit — nie wybrany. Kierunek za mało zdecydowany.'},
+  {designer:'kornelia',month:'2026-01',evaluator:'sandra',jakosc:2,samodzielnosc:2,wklad:2,rozwoj:2,note:''},
+  // FEBRUARY
+  {designer:'sandra',month:'2026-02',evaluator:'manager',jakosc:5,samodzielnosc:5,wklad:5,rozwoj:4,note:'GreenBox wygrana — samodzielnie zdefiniowała kierunek'},
+  {designer:'michal',month:'2026-02',evaluator:'manager',jakosc:5,samodzielnosc:5,wklad:3,rozwoj:4,note:'Dwa wygrane projekty w jednym miesiącu. Wyjątkowa skuteczność.'},
+  {designer:'klaudia',month:'2026-02',evaluator:'manager',jakosc:4,samodzielnosc:4,wklad:3,rozwoj:3,note:'Dżemy — wplynął. Brak przekonującego "wow moment".'},
+  {designer:'jero',month:'2026-02',evaluator:'manager',jakosc:3,samodzielnosc:4,wklad:4,rozwoj:2,note:'Fresho — nie wybrany. Świetna analiza strategiczna prezentacji ale design space za wąski.'},
+  {designer:'kasia',month:'2026-02',evaluator:'manager',jakosc:4,samodzielnosc:4,wklad:3,rozwoj:4,note:'Fresho wygrana — rebranding istniejącej marki, kasia w swoim żywiole'},
+  {designer:'natalia',month:'2026-02',evaluator:'manager',jakosc:4,samodzielnosc:3,wklad:3,rozwoj:4,note:'Fresho — wplynął. Rosnąca samodzielność.'},
+  {designer:'julka',month:'2026-02',evaluator:'manager',jakosc:2,samodzielnosc:2,wklad:2,rozwoj:3,note:'GreenBox — nie wysłana po raz drugi. Wymaga stałego monitoringu.'},
+  {designer:'kornelia',month:'2026-02',evaluator:'manager',jakosc:2,samodzielnosc:2,wklad:2,rozwoj:2,note:'GreenBox — nie wybrany. Zbyt wiele propozycji bez spójnej narracji.'},
+  // MARCH
+  {designer:'sandra',month:'2026-03',evaluator:'manager',jakosc:4,samodzielnosc:5,wklad:5,rozwoj:4,note:'FarmFresh — nie wybrany ale prowadziła meeting z klientem doskonale'},
+  {designer:'michal',month:'2026-03',evaluator:'manager',jakosc:5,samodzielnosc:5,wklad:3,rozwoj:4,note:'Dwa wygrane w jednym miesiącu. Herbaty i FarmFresh — spójny wyniki.'},
+  {designer:'klaudia',month:'2026-03',evaluator:'manager',jakosc:5,samodzielnosc:4,wklad:3,rozwoj:4,note:'Alpenmilch wygrana — piękna estetyka górska, dobrze odczytała brief'},
+  {designer:'jero',month:'2026-03',evaluator:'manager',jakosc:3,samodzielnosc:4,wklad:4,rozwoj:2,note:'Vivo — nie wybrany. Rozmawiałem o poszerzeniu estetyki. Opór.'},
+  {designer:'kasia',month:'2026-03',evaluator:'manager',jakosc:4,samodzielnosc:4,wklad:3,rozwoj:4,note:'Alpenmilch — wplynął. Dobra orientacja w briefie.'},
+  {designer:'natalia',month:'2026-03',evaluator:'manager',jakosc:5,samodzielnosc:4,wklad:3,rozwoj:5,note:'Vivo wygrana — świeży kierunek, trafił do młodszej grupy. Wyraźny postęp.'},
+  {designer:'julka',month:'2026-03',evaluator:'manager',jakosc:3,samodzielnosc:2,wklad:2,rozwoj:4,note:'Vivo — wplynął. Pierwszy raz element jej projektu trafił do klienta. Dobry progres.'},
+  {designer:'kornelia',month:'2026-03',evaluator:'manager',jakosc:2,samodzielnosc:2,wklad:2,rozwoj:2,note:'Alpenmilch — nie wybrany. Stagnacja, trudno zidentyfikować problem.'},
+  // APRIL
+  {designer:'sandra',month:'2026-04',evaluator:'manager',jakosc:5,samodzielnosc:5,wklad:5,rozwoj:4,note:'Vita Crunch wygrana — doskonała interpretacja briefa premium'},
+  {designer:'michal',month:'2026-04',evaluator:'manager',jakosc:5,samodzielnosc:5,wklad:3,rozwoj:4,note:'Złoty Kłos wygrana. Kolejny mocny miesiąc.'},
+  {designer:'klaudia',month:'2026-04',evaluator:'manager',jakosc:5,samodzielnosc:4,wklad:3,rozwoj:4,note:'Czekolady wygrana — emocjonalny design trafił w serce briefa'},
+  {designer:'jero',month:'2026-04',evaluator:'manager',jakosc:3,samodzielnosc:4,wklad:4,rozwoj:2,note:'Czekolady — nie wybrany. Bardzo wartościowy input strategiczny do prezentacji.'},
+  {designer:'kasia',month:'2026-04',evaluator:'manager',jakosc:4,samodzielnosc:4,wklad:3,rozwoj:4,note:'Złoty Kłos wplynął + ProWasser wplynął. Dobra dyspozycja.'},
+  {designer:'natalia',month:'2026-04',evaluator:'manager',jakosc:5,samodzielnosc:4,wklad:3,rozwoj:5,note:'ProWasser wygrana — coraz bardziej samodzielna interpretacja briefów B2C'},
+  {designer:'julka',month:'2026-04',evaluator:'manager',jakosc:3,samodzielnosc:3,wklad:2,rozwoj:4,note:'Vita Crunch — nie wybrana. Ale projekt przyzwoity — Sandra nie musiała ingerować.'},
+  {designer:'kornelia',month:'2026-04',evaluator:'manager',jakosc:2,samodzielnosc:2,wklad:2,rozwoj:2,note:'Złoty Kłos — nie wybrany. Porozmawiam z Sandrą o planie naprawczym.'},
+  // MAY
+  {designer:'sandra',month:'2026-05',evaluator:'manager',jakosc:5,samodzielnosc:5,wklad:5,rozwoj:4,note:'CreamLab + Solaro — wygrane. Jeden z najlepszych miesięcy.'},
+  {designer:'michal',month:'2026-05',evaluator:'manager',jakosc:4,samodzielnosc:5,wklad:3,rozwoj:3,note:'Berg & Tal wplynął. Pierwszy projekt który nie był "wybrany" od dłuższego czasu.'},
+  {designer:'klaudia',month:'2026-05',evaluator:'manager',jakosc:4,samodzielnosc:4,wklad:3,rozwoj:3,note:'CreamLab wplynął. Stabilny poziom.'},
+  {designer:'jero',month:'2026-05',evaluator:'manager',jakosc:3,samodzielnosc:4,wklad:4,rozwoj:2,note:'Berg & Tal — nie wybrany. Rozmawiałem poważnie o kierunku stylistycznym.'},
+  {designer:'kasia',month:'2026-05',evaluator:'manager',jakosc:5,samodzielnosc:4,wklad:3,rozwoj:4,note:'Berg & Tal wygrana — piwo rzemieślnicze to klasyczny rebranding, kasia idealna.'},
+  {designer:'natalia',month:'2026-05',evaluator:'manager',jakosc:5,samodzielnosc:5,wklad:3,rozwoj:5,note:'HappyCat wygrana — samodzielnie zdefiniowała kierunek i obroniła go przed klientem.'},
+  {designer:'julka',month:'2026-05',evaluator:'manager',jakosc:3,samodzielnosc:3,wklad:2,rozwoj:4,note:'HappyCat wplynął. Widoczny progres — konsekwentny minimalizm zaczyna działać.'},
+  {designer:'kornelia',month:'2026-05',evaluator:'manager',jakosc:2,samodzielnosc:2,wklad:2,rozwoj:2,note:'HappyCat nie wybrany. Zapada decyzja o planie naprawczym na czerwiec.'},
+];
 
-// ══════════════════════════════════════════════
-//  TABS
-// ══════════════════════════════════════════════
-function showTab(name, btn) {
-  document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  if (btn) btn.classList.add('active');
-}
-function goToTab(name) {
-  const btn = document.querySelector(`.tab-btn[data-tab="${name}"]`);
-  showTab(name, btn);
-}
+// ===================== STATE =====================
+let currentRole = null;
+let currentTab = null;
+let selectedDesigner = null;
+let selectedEvalDesigner = 'michal';
+let selectedEvalMonth = '2026-05';
+let selectedEvalEvaluator = 'manager';
+let currentMonth = '2026-06';
 
-// ══════════════════════════════════════════════
-//  DASHBOARD
-// ══════════════════════════════════════════════
-function renderDashboard() {
-  // Ranking
-  const creative = DESIGNERS.filter(d => d.type === 'creative').sort((a,b) => b.winRate - a.winRate);
-  const rows = creative.map((d,i) => `
-    <tr class="clickable-row" onclick="goToDesigner('${d.id}')">
-      <td style="color:var(--muted);font-size:12px;">${i+1}</td>
-      <td><strong>${d.name}</strong> <span style="font-size:11px;color:var(--muted);margin-left:4px;">${d.level}</span></td>
-      <td>
-        <div class="wr-bar">
-          <div class="wr-track"><div class="wr-fill" style="width:${d.winRate}%;background:${wrFill(d.winRate)};height:6px;border-radius:3px;"></div></div>
-          <span style="font-weight:700;color:${wrColor(d.winRate)};font-size:13px;">${d.winRate}%</span>
-        </div>
-      </td>
-      <td style="color:var(--muted);font-size:13px;">${fmtPLN(d.revenue)} PLN</td>
-    </tr>`).join('');
-  document.getElementById('ranking-table').innerHTML =
-    `<thead><tr><th>#</th><th>Grafik</th><th>Win Rate</th><th>Revenue</th></tr></thead><tbody>${rows}</tbody>`;
+// ===================== HELPERS =====================
+function getDesigner(id){ return DESIGNERS.find(d=>d.id===id); }
+function initials(name){ return name.substring(0,2).toUpperCase(); }
 
-  // Loss chart
-  const lost = DEALS.filter(d => d.status === 'lost');
-  const reasons = {};
-  lost.forEach(d => { reasons[d.why] = (reasons[d.why]||0)+1; });
-  const colors = { Cena:'var(--accent4)', Kreacja:'var(--accent2)', 'Zakres usług':'var(--accent)' };
-  const max = Math.max(...Object.values(reasons));
-  const chartHtml = Object.entries(reasons).map(([r,n]) => {
-    const pct = Math.round(n/lost.length*100);
-    const h = Math.round(n/max*100);
-    const c = colors[r]||'var(--muted)';
-    return `<div class="lc-col">
-      <div class="lc-bar-wrap"><div class="lc-bar" style="height:${h}%;background:${c};opacity:.85;"></div></div>
-      <div class="lc-pct" style="color:${c};">${pct}%</div>
-      <div class="lc-lbl">${r}</div>
-    </div>`;
-  }).join('');
-  document.getElementById('loss-chart').innerHTML = chartHtml;
-
-  // Alerts
-  const avg = Math.round(creative.reduce((s,d)=>s+d.winRate,0)/creative.length);
-  let alertsHtml = '';
-  creative.filter(d=>d.winRate<60).forEach(d => {
-    alertsHtml += `<div class="alert-card warn"><div class="alert-icon">⚠️</div><div class="alert-text"><h4>${d.name} — Win Rate poniżej 60%</h4><p>Aktualny wynik: ${d.winRate}%. Średnia zespołu: ${avg}%. Zalecana analiza przydzielanych projektów i rola SUPPORT.</p></div></div>`;
+function getReactions(designerId, months){
+  const result = {wybrany:0,wplynął:0,nie_wybrany:0,nie_wyslany:0,total:0};
+  projects.filter(p=>(!months||months.includes(p.month))&&p.status==='closed'&&p.crew.includes(designerId)).forEach(p=>{
+    const r = p.reactions[designerId];
+    if(r) { result[r]=(result[r]||0)+1; result.total++; }
   });
-  DESIGNERS.filter(d=>d.type==='technical'&&d.revRate>1.5).forEach(d => {
-    alertsHtml += `<div class="alert-card warn"><div class="alert-icon">🔄</div><div class="alert-text"><h4>${d.name} — Revision Rate powyżej celu</h4><p>Wynik: ${d.revRate} rundy (cel ≤ 1,5). Sprawdź ostatnie projekty i feedback od PM.</p></div></div>`;
+  return result;
+}
+
+function getWinRate(designerId, months){
+  const r = getReactions(designerId, months);
+  if(!r.total) return null;
+  const effective = r.total - r.nie_wyslany;
+  if(!effective) return null;
+  return Math.round(((r.wybrany + r.wplynął*0.5) / effective)*100);
+}
+
+function getEval(designerId, month, evaluator){
+  return evaluations.find(e=>e.designer===designerId&&e.month===month&&e.evaluator===evaluator);
+}
+
+function getAvgExpert(designerId, month){
+  const m = getEval(designerId, month, 'manager');
+  const s = getEval(designerId, month, 'sandra');
+  const evals = [m,s].filter(Boolean);
+  if(!evals.length) return null;
+  const avg = e => (e.jakosc+e.samodzielnosc+e.wklad+e.rozwoj)/4;
+  return Math.round((evals.reduce((sum,e)=>sum+avg(e),0)/evals.length)*10)/10;
+}
+
+function avatarHtml(d, size=40){
+  return `<div class="dc-avatar" style="width:${size}px;height:${size}px;background:${d.color}22;color:${d.color};font-size:${size*0.4}px;">${initials(d.name)}</div>`;
+}
+
+function reactIcon(r){
+  const m = {wybrany:'✅',wplynął:'🔶',nie_wybrany:'❌',nie_wyslany:'🚫'};
+  return m[r]||'—';
+}
+function reactClass(r){
+  const m = {wybrany:'won',wplynął:'inf',nie_wybrany:'lost',nie_wyslany:'ns'};
+  return m[r]||'';
+}
+function reactLabel(r){
+  const m = {wybrany:'Wybrany',wplynął:'Wpłynął',nie_wybrany:'Nie wybrany',nie_wyslany:'Nie wysłany'};
+  return m[r]||r;
+}
+
+// SVG trajectory — win rate per month
+function trajSVG(designerId){
+  const pts = MONTHS.map(m=>{
+    const r = getReactions(designerId,[m]);
+    const eff = r.total - r.nie_wyslany;
+    if(!eff) return null;
+    return Math.round(((r.wybrany + r.wplynął*0.5)/eff)*100);
   });
-  const top = creative[0];
-  alertsHtml += `<div class="alert-card ok"><div class="alert-icon">🏆</div><div class="alert-text"><h4>${top.name} — najwyższy win rate miesiąca</h4><p>${top.winRate}% ogólnie · DE ${top.mkt.DE}%. Priorytetowy LEAD do przetargów premium.</p></div></div>`;
-  document.getElementById('alerts').innerHTML = alertsHtml;
-}
-
-// ══════════════════════════════════════════════
-//  GRAFICY
-// ══════════════════════════════════════════════
-function renderDesignerGrid() {
-  const creative = DESIGNERS.filter(d => d.type === 'creative');
-  document.getElementById('designer-grid').innerHTML = creative.map(d => `
-    <div class="designer-card" id="dc-${d.id}" onclick="selectDesigner('${d.id}')">
-      <div class="dc-name">${d.name}</div>
-      <div class="dc-role">${d.role} · ${d.level}</div>
-      <div class="dc-metrics">
-        <div class="dc-m">
-          <div class="val" style="color:${wrColor(d.winRate)};">${d.winRate}%</div>
-          <div class="lbl">Win Rate</div>
-        </div>
-        <div class="dc-m">
-          <div class="val" style="color:var(--accent);">${fmtPLN(d.revenue)}</div>
-          <div class="lbl">Revenue PLN</div>
-        </div>
-        <div class="dc-m">
-          <div class="val" style="color:var(--muted);font-size:18px;">${d.deals}</div>
-          <div class="lbl">Dealów</div>
-        </div>
-      </div>
-    </div>`).join('');
-}
-
-let activeDesigner = null;
-
-function selectDesigner(id) {
-  if (activeDesigner === id) { closeDetail(); return; }
-  activeDesigner = id;
-  document.querySelectorAll('.designer-card').forEach(el => el.classList.remove('selected'));
-  const card = document.getElementById('dc-' + id);
-  if (card) card.classList.add('selected');
-  renderDetail(id);
-}
-
-function renderDetail(id) {
-  const d = byId(id);
-  if (!d || d.type !== 'creative') return;
-  const myDeals = dealsByDesigner(id).slice().reverse().slice(0,6);
-
-  const catBars = Object.entries(d.cat).map(([k,v]) =>
-    `<div class="bar-row">
-      <span class="bar-lbl">${k}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${v}%;background:${wrFill(v)};height:8px;border-radius:3px;"></div></div>
-      <span class="bar-pct" style="color:${wrColor(v)};">${v}%</span>
-    </div>`).join('');
-
-  const mktBars = Object.entries(d.mkt).map(([k,v]) =>
-    `<div class="bar-row">
-      <span class="bar-lbl">${k}</span>
-      <div class="bar-track"><div class="bar-fill" style="width:${v}%;background:${wrFill(v)};height:8px;border-radius:3px;"></div></div>
-      <span class="bar-pct" style="color:${wrColor(v)};">${v}%</span>
-    </div>`).join('');
-
-  const dealRows = myDeals.map(deal => {
-    const myRole = deal.crew.find(c=>c.id===id)?.role||'?';
-    const rTag = myRole==='LEAD' ? '<span class="tag lead">LEAD</span>' : '<span class="tag support">SUPPORT</span>';
-    return `<tr>
-      <td style="font-family:monospace;font-size:12px;color:var(--muted);">[${deal.id}]</td>
-      <td>${deal.name}</td>
-      <td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:4px;">${deal.cat}</span></td>
-      <td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:4px;">${deal.mkt}</span></td>
-      <td>${rTag}</td>
-      <td>${statusTag(deal)}</td>
-      <td style="font-weight:700;text-align:right;">${fmtPLN(deal.value)} PLN</td>
-    </tr>`;
+  const valid = pts.filter(p=>p!==null);
+  if(valid.length < 2) return '<p style="font-size:12px;color:var(--muted)">Za mało danych</p>';
+  const w=300,h=60,pad=4;
+  const min=0,max=100;
+  const coords = pts.map((p,i)=>{
+    const x = pad + (i/(MONTHS.length-1))*(w-pad*2);
+    const y = p===null ? null : h - pad - ((p-min)/(max-min))*(h-pad*2);
+    return {x,y,v:p};
+  });
+  let pathD='', dots='';
+  let first=true;
+  coords.forEach((c,i)=>{
+    if(c.y===null) return;
+    if(first){pathD=`M ${c.x} ${c.y}`;first=false;}
+    else pathD+=` L ${c.x} ${c.y}`;
+    dots+=`<circle cx="${c.x}" cy="${c.y}" r="3" fill="${DESIGNERS.find(d=>d.id===designerId).color}"/>`;
+  });
+  const labels = MONTHS.map((m,i)=>{
+    const x = pad + (i/(MONTHS.length-1))*(w-pad*2);
+    return `<text x="${x}" y="${h}" font-size="8" fill="var(--muted)" text-anchor="middle">${m.slice(5)}</text>`;
   }).join('');
+  const d=DESIGNERS.find(x=>x.id===designerId);
+  return `<svg viewBox="0 0 ${w} ${h+12}" style="width:100%;height:72px;overflow:visible">
+    <path d="${pathD}" stroke="${d.color}" stroke-width="2" fill="none" opacity="0.8"/>
+    ${dots}${labels}
+  </svg>`;
+}
 
-  document.getElementById('designer-detail').innerHTML = `
-    <div class="designer-detail">
-      <div class="dd-header">
+// ===================== ROLE SELECT =====================
+function selectRole(role){
+  currentRole = role;
+  document.getElementById('role-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  const badge = {manager:'Manager',account:'Account',sandra:'Sandra (Ocena Ekspercka)',grafik:'Grafik'};
+  document.getElementById('role-badge').textContent = badge[role];
+  renderNav();
+  const tabs = {manager:'dashboard',account:'projekty',sandra:'ocena',grafik:'moje'};
+  switchTab(tabs[role]);
+}
+
+function switchRole(){
+  document.getElementById('role-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+
+// ===================== NAV =====================
+function renderNav(){
+  const tabs = {
+    manager:[{id:'dashboard',label:'Dashboard'},{id:'ocena',label:'Ocena ekspercka'},{id:'projekty',label:'Projekty'}],
+    account:[{id:'projekty',label:'Projekty'},{id:'archiwum',label:'Archiwum'}],
+    sandra:[{id:'ocena',label:'Ocena ekspercka'},{id:'dashboard',label:'Podgląd zespołu'}],
+    grafik:[{id:'moje',label:'Moje wyniki'}],
+  };
+  const list = tabs[currentRole]||[];
+  document.getElementById('nav-tabs').innerHTML = list.map(t=>
+    `<button class="tab-btn${currentTab===t.id?' active':''}" onclick="switchTab('${t.id}')">${t.label}</button>`
+  ).join('');
+}
+
+function switchTab(tab){
+  currentTab = tab;
+  renderNav();
+  const el = document.getElementById('main-content');
+  if(tab==='dashboard') el.innerHTML = renderDashboard();
+  else if(tab==='projekty') el.innerHTML = renderProjects();
+  else if(tab==='archiwum') el.innerHTML = renderArchive();
+  else if(tab==='ocena') el.innerHTML = renderEvalForm();
+  else if(tab==='moje') el.innerHTML = renderGrafikView();
+}
+
+// ===================== DASHBOARD =====================
+function renderDashboard(){
+  const allMonths = MONTHS.filter(m=>m<='2026-05');
+  const cards = DESIGNERS.map(d=>{
+    const r5 = getReactions(d.id, allMonths);
+    const wr = getWinRate(d.id, allMonths);
+    const lastEval = getAvgExpert(d.id,'2026-05');
+    const prevEval = getAvgExpert(d.id,'2026-04');
+    const trend = lastEval&&prevEval ? (lastEval>prevEval?'↑':lastEval<prevEval?'↓':'→') : '';
+    const trendColor = trend==='↑'?'var(--accent3)':trend==='↓'?'var(--accent2)':'var(--muted)';
+    const lastE = getEval(d.id,'2026-05','manager');
+    return `<div class="designer-card" onclick="showDesignerDetail('${d.id}')">
+      <div class="dc-header">
+        ${avatarHtml(d)}
         <div>
-          <div class="dd-name">${d.name} <span style="font-size:12px;background:rgba(108,99,255,.2);color:var(--accent);padding:2px 10px;border-radius:10px;font-weight:700;vertical-align:middle;">${d.level}</span></div>
-          <div class="dd-meta">${d.role} · ${d.rate} PLN/h</div>
+          <div class="dc-name">${d.name}</div>
+          <div class="dc-role">${d.role} · ${d.exp}</div>
         </div>
-        <button class="close-btn" onclick="closeDetail()">✕ Zamknij</button>
+        ${wr!==null?`<div style="margin-left:auto;text-align:right;"><div style="font-size:20px;font-weight:800;color:var(--accent4)">${wr}%</div><div style="font-size:11px;color:var(--muted)">win rate</div></div>`:''}
       </div>
-      <div class="dd-metrics">
-        <div class="dd-m"><div class="val" style="color:${wrColor(d.winRate)};">${d.winRate}%</div><div class="lbl">Win Rate</div></div>
-        <div class="dd-m"><div class="val" style="color:var(--accent);">${fmtPLN(d.revenue)} PLN</div><div class="lbl">Revenue YTD</div></div>
-        <div class="dd-m"><div class="val" style="color:var(--accent4);">${fmtPLN(d.rph)}</div><div class="lbl">PLN / Godzina</div></div>
-        <div class="dd-m"><div class="val">${d.deals}</div><div class="lbl">Dealów</div></div>
-        <div class="dd-m"><div class="val" style="color:${wrColor(d.mkt.DE)};">${d.mkt.DE}%</div><div class="lbl">Win Rate DE</div></div>
+      <div class="dc-reactions">
+        <div class="dc-react"><span class="dc-react-icon">✅</span><span class="dc-react-label">Wybrany</span><span class="dc-react-val won">${r5.wybrany}</span></div>
+        <div class="dc-react"><span class="dc-react-icon">🔶</span><span class="dc-react-label">Wpłynął</span><span class="dc-react-val inf">${r5.wplynął}</span></div>
+        <div class="dc-react"><span class="dc-react-icon">❌</span><span class="dc-react-label">Nie wybrany</span><span class="dc-react-val lost">${r5.nie_wybrany}</span></div>
+        <div class="dc-react"><span class="dc-react-icon">🚫</span><span class="dc-react-label">Nie wysłany</span><span class="dc-react-val ns">${r5.nie_wyslany}</span></div>
       </div>
-      <div class="dd-insight">💡 ${d.insight}</div>
-      <div class="dd-two-col">
-        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">Win Rate wg kategorii</div>${catBars}</div>
-        <div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">Win Rate wg rynku</div>${mktBars}</div>
-      </div>
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Ostatnie projekty</div>
-      <table>
-        <thead><tr><th>Deal ID</th><th>Projekt</th><th>Kategoria</th><th>Rynek</th><th>Rola</th><th>Status</th><th style="text-align:right;">Wartość</th></tr></thead>
-        <tbody>${dealRows || '<tr><td colspan="7" style="text-align:center;color:var(--muted);">Brak danych</td></tr>'}</tbody>
-      </table>
+      ${lastEval?`<div class="expert-badge"><span class="expert-score">Ocena ekspercka maj: <strong>${lastEval}</strong>/5</span><span style="color:${trendColor};font-size:14px;font-weight:700;margin-left:4px">${trend}</span></div>`:''}
+      ${lastE?.note?`<div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic">"${lastE.note.substring(0,80)}..."</div>`:''}
     </div>`;
-
-  document.getElementById('designer-detail').scrollIntoView({ behavior:'smooth', block:'nearest' });
-}
-
-function closeDetail() {
-  activeDesigner = null;
-  document.querySelectorAll('.designer-card').forEach(el => el.classList.remove('selected'));
-  document.getElementById('designer-detail').innerHTML = '';
-}
-
-function goToDesigner(id) {
-  goToTab('graficy');
-  setTimeout(() => selectDesigner(id), 50);
-}
-
-function switchMode(mode, btn) {
-  document.querySelectorAll('.inner-tab').forEach(el => el.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('creative-section').style.display = mode === 'creative' ? 'block' : 'none';
-  document.getElementById('technical-section').style.display = mode === 'technical' ? 'block' : 'none';
-  if (mode === 'technical') renderTechTable();
-}
-
-function renderTechTable() {
-  const tech = DESIGNERS.filter(d => d.type === 'technical');
-  const rows = tech.map(d => {
-    const rrOk = d.revRate <= 1.5;
-    const otOk = d.onTime >= 90;
-    const overall = (rrOk && otOk) ? 'excellent' : (!rrOk || !otOk) && (d.revRate > 2 || d.onTime < 85) ? 'attention' : 'good';
-    return `<tr>
-      <td><strong>${d.name}</strong></td>
-      <td style="font-size:12px;color:var(--muted);">${d.role} · ${d.level}</td>
-      <td style="font-weight:700;color:${rrOk?'var(--accent3)':'var(--accent2)'};">${d.revRate} <span style="font-size:11px;color:var(--muted);font-weight:400;">/ cel ≤1,5</span></td>
-      <td style="font-weight:700;color:${otOk?'var(--accent3)':'var(--accent2)'};">${d.onTime}% <span style="font-size:11px;color:var(--muted);font-weight:400;">/ cel ≥90%</span></td>
-      <td style="font-weight:700;color:var(--accent3);">${d.repeat}%</td>
-      <td><span class="tag ${overall}">${overall==='excellent'?'✓ Excellent':overall==='good'?'~ Good':'⚠ Attention'}</span></td>
-    </tr>`;
   }).join('');
-  document.getElementById('tech-table').innerHTML =
-    `<thead><tr><th>Grafik</th><th>Rola</th><th>Revision Rate</th><th>On-Time Rate</th><th>Repeat Rate</th><th>Status</th></tr></thead><tbody>${rows}</tbody>`;
+
+  const wrRows = [...DESIGNERS].sort((a,b)=>(getWinRate(b.id,allMonths)||0)-(getWinRate(a.id,allMonths)||0)).map(d=>{
+    const wr = getWinRate(d.id, allMonths)||0;
+    return `<div class="winrate-row">
+      <div class="wr-name">${d.name}</div>
+      <div class="wr-bar-wrap"><div class="wr-bar" style="width:${wr}%;background:${d.color}"></div></div>
+      <div class="wr-val">${wr}%</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="section-title">Dashboard — Styczeń–Maj 2026</div>
+  <div class="alert info">Dane obejmują 5 pełnych miesięcy (20 projektów). Czerwiec w toku — 2 aktywne projekty.</div>
+  <div class="card" style="margin-bottom:20px">
+    <div style="font-size:14px;font-weight:700;margin-bottom:14px">Ranking win rate (wybrany + 0.5×wpłynął)</div>
+    ${wrRows}
+    <div style="font-size:11px;color:var(--muted);margin-top:10px">* Win rate jest informacyjny — nie porównuj bez kontekstu przydziału projektów przez accountów.</div>
+  </div>
+  <div class="designer-grid">${cards}</div>`;
 }
 
-// ══════════════════════════════════════════════
-//  DEAL LOOKUP
-// ══════════════════════════════════════════════
-function lookupDeal() {
-  const raw = document.getElementById('lookup-input').value.trim().replace(/[\[\]\s]/g,'');
-  const container = document.getElementById('lookup-result');
-  if (!raw) { container.innerHTML = ''; return; }
+// ===================== DESIGNER DETAIL MODAL =====================
+function showDesignerDetail(id){
+  const d = DESIGNERS.find(x=>x.id===id);
+  const allMonths = MONTHS.filter(m=>m<='2026-05');
+  const r = getReactions(id, allMonths);
 
-  const deal = DEALS.find(d => d.id === raw);
-  if (!deal) {
-    container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>Nie znaleziono szansy <strong>[${raw}]</strong> w danych demo.</p></div>`;
+  const monthRows = allMonths.map(m=>{
+    const rm = getReactions(id,[m]);
+    const av = getAvgExpert(id,m);
+    const projs = projects.filter(p=>p.month===m&&p.crew.includes(id)&&p.status==='closed');
+    if(!projs.length) return '';
+    const reacts = projs.map(p=>`<span style="font-size:11px">${reactIcon(p.reactions[id]||'')} ${p.name}</span>`).join('<br>');
+    return `<div class="month-card">
+      <div class="month-label">${MONTH_LABELS[m]}</div>
+      <div style="font-size:11px;margin-bottom:6px">${reacts}</div>
+      ${av?`<div class="month-expert">Ocena: <strong>${av}/5</strong></div>`:'<div class="month-expert" style="color:var(--muted)">Brak oceny</div>'}
+    </div>`;
+  }).join('');
+
+  const traj = trajSVG(id);
+  const wr = getWinRate(id, allMonths);
+
+  openModal(`<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+    ${avatarHtml(d,48)}
+    <div><div style="font-size:20px;font-weight:800">${d.name}</div><div style="font-size:13px;color:var(--muted)">${d.role} · ${d.exp}</div></div>
+    ${wr!==null?`<div style="margin-left:auto;text-align:right"><div style="font-size:28px;font-weight:800;color:var(--accent4)">${wr}%</div><div style="font-size:11px;color:var(--muted)">win rate</div></div>`:''}
+  </div>
+  <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px">Trajektoria win rate</div>
+  ${traj}
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0">
+    <div class="dc-react"><span class="dc-react-icon">✅</span><span class="dc-react-label">Wybrany</span><span class="dc-react-val won">${r.wybrany}</span></div>
+    <div class="dc-react"><span class="dc-react-icon">🔶</span><span class="dc-react-label">Wpłynął</span><span class="dc-react-val inf">${r.wplynął}</span></div>
+    <div class="dc-react"><span class="dc-react-icon">❌</span><span class="dc-react-label">Nie wybrany</span><span class="dc-react-val lost">${r.nie_wybrany}</span></div>
+    <div class="dc-react"><span class="dc-react-icon">🚫</span><span class="dc-react-label">Nie wysłany</span><span class="dc-react-val ns">${r.nie_wyslany}</span></div>
+  </div>
+  <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:12px">Historia miesięczna</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${monthRows}</div>
+  <div class="btn-row"><button class="btn secondary" onclick="closeModal()">Zamknij</button></div>`);
+}
+
+// ===================== PROJECTS (ACCOUNT) =====================
+function renderProjects(){
+  const open = projects.filter(p=>p.status==='open');
+  const list = open.map(p=>{
+    const crew = p.crew.map(id=>{
+      const d=getDesigner(id);
+      return `<span class="crew-tag">${d.name}</span>`;
+    }).join('');
+    return `<div class="proj-item active-proj">
+      <div class="proj-status open"></div>
+      <div class="proj-info">
+        <div class="proj-name">${p.name}</div>
+        <div class="proj-meta">${MONTH_LABELS[p.month]} · ${p.fee?'Z fee':'Bez fee'}</div>
+        <div class="proj-crew">${crew}</div>
+      </div>
+      <button class="close-btn" onclick="openCloseModal('${p.id}')">Zamknij projekt</button>
+    </div>`;
+  }).join('');
+
+  return `<div class="section-title">Aktywne projekty</div>
+  <div class="alert info">Kliknij "Zamknij projekt" gdy klient podjął decyzję. Wybierz reakcję dla każdego grafika — max 2–3 kliknięcia na osobę.</div>
+  ${open.length?`<div class="proj-list">${list}</div>`:'<div class="alert success">Brak aktywnych projektów do zamknięcia.</div>'}`;
+}
+
+function renderArchive(){
+  const closed = [...projects].filter(p=>p.status==='closed').reverse();
+  const list = closed.map(p=>{
+    const crew = p.crew.map(id=>{
+      const d=getDesigner(id);
+      const r = p.reactions[id];
+      return `<span class="crew-tag">${reactIcon(r)} ${d.name}</span>`;
+    }).join('');
+    return `<div class="proj-item">
+      <div class="proj-status closed"></div>
+      <div class="proj-info">
+        <div class="proj-name">${p.name}</div>
+        <div class="proj-meta">${MONTH_LABELS[p.month]}</div>
+        <div class="proj-crew">${crew}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="section-title">Archiwum projektów</div><div class="proj-list">${list}</div>`;
+}
+
+function openCloseModal(projId){
+  const p = projects.find(x=>x.id===projId);
+  const options = [
+    {val:'wybrany', icon:'✅', label:'Wybrany', desc:'Klient wybrał jako główną bazę', cls:'won'},
+    {val:'wplynął', icon:'🔶', label:'Wpłynął', desc:'Elementy trafiły do finału lub zainteresowanie', cls:'inf'},
+    {val:'nie_wybrany', icon:'❌', label:'Nie wybrany', desc:'Design nie wzbudził zainteresowania', cls:'lost'},
+    {val:'nie_wyslany', icon:'🚫', label:'Nie wysłany', desc:'Zbyt słaba jakość — nie dotarło do klienta', cls:'ns'},
+  ];
+
+  const groups = p.crew.map(id=>{
+    const d = getDesigner(id);
+    const opts = options.map(o=>`
+      <div class="react-opt" id="opt_${id}_${o.val}" onclick="selectReaction('${projId}','${id}','${o.val}')">
+        <span class="react-icon">${o.icon}</span>
+        <span class="react-text">${o.label}</span>
+      </div>`).join('');
+    return `<div class="reaction-group">
+      <div class="reaction-group-name">${avatarHtml(d,28)} <span style="vertical-align:middle;margin-left:8px">${d.name} <span style="font-size:12px;color:var(--muted)">${d.role}</span></span></div>
+      <div class="reaction-options">${opts}</div>
+    </div>`;
+  }).join('');
+
+  openModal(`<h3>${p.name}</h3>
+  <p class="modal-sub">Wybierz reakcję klienta na projekt każdego grafika</p>
+  <div id="reaction-form-${projId}">${groups}</div>
+  <div class="btn-row">
+    <button class="btn" onclick="submitReactions('${projId}')">Zapisz i zamknij projekt</button>
+    <button class="btn secondary" onclick="closeModal()">Anuluj</button>
+  </div>`);
+
+  // restore saved
+  p.crew.forEach(id=>{
+    if(p.reactions[id]) highlightReaction(projId,id,p.reactions[id]);
+  });
+}
+
+function selectReaction(projId, designerId, val){
+  const p = projects.find(x=>x.id===projId);
+  if(!p.reactions) p.reactions = {};
+  p.reactions[designerId] = val;
+  highlightReaction(projId, designerId, val);
+}
+
+function highlightReaction(projId, designerId, val){
+  const opts = ['wybrany','wplynął','nie_wybrany','nie_wyslany'];
+  const clsMap = {wybrany:'selected-won',wplynął:'selected-inf',nie_wybrany:'selected-lost',nie_wyslany:'selected-ns'};
+  opts.forEach(o=>{
+    const el = document.getElementById(`opt_${designerId}_${o}`);
+    if(el){
+      el.className = 'react-opt';
+      if(o===val) el.classList.add(clsMap[val]);
+    }
+  });
+}
+
+function submitReactions(projId){
+  const p = projects.find(x=>x.id===projId);
+  const missing = p.crew.filter(id=>!p.reactions[id]);
+  if(missing.length){
+    alert(`Brak reakcji dla: ${missing.map(id=>getDesigner(id).name).join(', ')}`);
     return;
   }
+  p.status = 'closed';
+  closeModal();
+  switchTab('projekty');
+  showToast('Projekt zamknięty. Reakcje zapisane. ✅');
+}
 
-  const crewHtml = deal.crew.map(c => {
-    const d = byId(c.id);
-    if (!d) return '';
-    const catWR = d.cat[deal.cat] ?? d.winRate;
-    const mktWR = d.mkt[deal.mkt] ?? d.winRate;
-    const rTag = c.role === 'LEAD' ? '<span class="tag lead">LEAD</span>' : '<span class="tag support">SUPPORT</span>';
-    return `<div class="crew-row">
-      <div class="crew-name">${d.name}</div>
-      <div class="crew-role-col">${rTag}</div>
-      <div class="crew-stats">
-        <div class="cs-item"><div class="lbl">Win Rate ${deal.cat}</div><div class="val" style="color:${wrColor(catWR)};">${catWR}%</div></div>
-        <div class="cs-item"><div class="lbl">Win Rate ${deal.mkt}</div><div class="val" style="color:${wrColor(mktWR)};">${mktWR}%</div></div>
-        <div class="cs-item"><div class="lbl">Win Rate ogólny</div><div class="val" style="color:${wrColor(d.winRate)};">${d.winRate}%</div></div>
+// ===================== EVAL FORM =====================
+function renderEvalForm(){
+  const evalMonths = MONTHS.filter(m=>m<='2026-05');
+
+  const designerBtns = DESIGNERS.map(d=>
+    `<button class="eval-select-btn${selectedEvalDesigner===d.id?' active':''}" onclick="selectEvalDesigner('${d.id}')">${d.name}</button>`
+  ).join('');
+
+  const monthBtns = evalMonths.map(m=>
+    `<button class="eval-select-btn${selectedEvalMonth===m?' active':''}" onclick="selectEvalMonth('${m}')">${MONTH_LABELS[m]}</button>`
+  ).join('');
+
+  const evalBtns = currentRole==='manager'
+    ? `<button class="eval-select-btn${selectedEvalEvaluator==='manager'?' active':''}" onclick="selectEvalEval('manager')">Manager</button>
+       <button class="eval-select-btn${selectedEvalEvaluator==='sandra'?' active':''}" onclick="selectEvalEval('sandra')">Sandra</button>`
+    : `<div class="eval-select-btn active">Sandra</div>`;
+
+  const existing = getEval(selectedEvalDesigner, selectedEvalMonth, currentRole==='manager'?selectedEvalEvaluator:'sandra');
+  const d = getDesigner(selectedEvalDesigner);
+  const v = (dim) => existing ? existing[dim] : 3;
+
+  const dims = [
+    {id:'jakosc',label:'Jakość designu',desc:'Poziom estetyczny i zgodność z briefem'},
+    {id:'samodzielnosc',label:'Samodzielność',desc:'Praca bez nakierowania'},
+    {id:'wklad',label:'Wkład w zespół',desc:'Wsparcie innych, inicjatywy, spotkania'},
+    {id:'rozwoj',label:'Rozwój',desc:'Zmiana względem poprzedniego miesiąca'},
+  ];
+
+  const sliders = dims.map(dim=>`
+    <div class="form-group">
+      <label>${dim.label} <span style="font-size:11px;font-weight:400;color:var(--muted)">${dim.desc}</span></label>
+      <div class="range-wrap">
+        <input type="range" min="1" max="5" step="1" value="${v(dim.id)}" id="range_${dim.id}" oninput="document.getElementById('val_${dim.id}').textContent=this.value">
+        <div class="range-val" id="val_${dim.id}">${v(dim.id)}</div>
       </div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px">
+        <span>1 — niesamodzielna/nienadająca się</span><span>5 — doskonała</span>
+      </div>
+    </div>`).join('');
+
+  return `<div class="section-title">Ocena ekspercka</div>
+  <div class="alert info">Każda ocena musi być zakotwiczona w konkretnym projekcie. Oceń osobno każdego grafika za dany miesiąc.</div>
+  <div class="card" style="margin-bottom:16px">
+    <label>Grafik</label>
+    <div class="eval-designer-select">${designerBtns}</div>
+    <label>Miesiąc</label>
+    <div class="eval-month-select">${monthBtns}</div>
+    ${currentRole==='manager'?`<label>Oceniający</label><div class="eval-month-select">${evalBtns}</div>`:''}
+  </div>
+  <div class="card" id="eval-form-card">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      ${avatarHtml(d)}
+      <div><div style="font-size:16px;font-weight:700">${d.name}</div><div style="font-size:12px;color:var(--muted)">${MONTH_LABELS[selectedEvalMonth]}</div></div>
+    </div>
+    ${sliders}
+    <div class="form-group">
+      <label>Notatka (konkretny projekt jako przykład)</label>
+      <textarea id="eval_note" placeholder="Np. W projekcie Graal — design wymagał interwencji Sandry przy 2 iteracji...">${existing?.note||''}</textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="saveEval()">Zapisz ocenę</button>
+      ${existing?`<button class="btn danger" onclick="deleteEval()">Usuń ocenę</button>`:''}
+    </div>
+  </div>`;
+}
+
+function selectEvalDesigner(id){ selectedEvalDesigner=id; switchTab('ocena'); }
+function selectEvalMonth(m){ selectedEvalMonth=m; switchTab('ocena'); }
+function selectEvalEval(e){ selectedEvalEvaluator=e; switchTab('ocena'); }
+
+function saveEval(){
+  const evaluator = currentRole==='manager' ? selectedEvalEvaluator : 'sandra';
+  const idx = evaluations.findIndex(e=>e.designer===selectedEvalDesigner&&e.month===selectedEvalMonth&&e.evaluator===evaluator);
+  const entry = {
+    designer: selectedEvalDesigner,
+    month: selectedEvalMonth,
+    evaluator,
+    jakosc: parseInt(document.getElementById('range_jakosc').value),
+    samodzielnosc: parseInt(document.getElementById('range_samodzielnosc').value),
+    wklad: parseInt(document.getElementById('range_wklad').value),
+    rozwoj: parseInt(document.getElementById('range_rozwoj').value),
+    note: document.getElementById('eval_note').value,
+  };
+  if(idx>=0) evaluations[idx]=entry; else evaluations.push(entry);
+  showToast('Ocena zapisana ✅');
+  switchTab('ocena');
+}
+
+function deleteEval(){
+  const evaluator = currentRole==='manager' ? selectedEvalEvaluator : 'sandra';
+  evaluations = evaluations.filter(e=>!(e.designer===selectedEvalDesigner&&e.month===selectedEvalMonth&&e.evaluator===evaluator));
+  switchTab('ocena');
+  showToast('Ocena usunięta');
+}
+
+// ===================== GRAFIK VIEW =====================
+function renderGrafikView(){
+  if(!selectedDesigner) selectedDesigner = DESIGNERS[0].id;
+  const btns = DESIGNERS.map(d=>
+    `<button class="grafik-btn${selectedDesigner===d.id?' active':''}" onclick="selectGrafik('${d.id}')">${d.name}</button>`
+  ).join('');
+
+  const d = getDesigner(selectedDesigner);
+  const allMonths = MONTHS.filter(m=>m<='2026-05');
+  const r = getReactions(selectedDesigner, allMonths);
+  const wr = getWinRate(selectedDesigner, allMonths);
+
+  const monthCards = allMonths.map(m=>{
+    const rm = getReactions(selectedDesigner,[m]);
+    const av = getAvgExpert(selectedDesigner,m);
+    const em = getEval(selectedDesigner,m,'manager');
+    const projs = projects.filter(p=>p.month===m&&p.crew.includes(selectedDesigner)&&p.status==='closed');
+    return `<div class="month-card">
+      <div class="month-label">${MONTH_LABELS[m]}</div>
+      ${projs.map(p=>`<div style="font-size:11px;margin-bottom:3px">${reactIcon(p.reactions[selectedDesigner]||'')} ${reactLabel(p.reactions[selectedDesigner]||'')} — ${p.name}</div>`).join('')}
+      ${av?`<div class="month-expert" style="margin-top:6px">Ocena ekspercka: <strong>${av}/5</strong></div>`:''}
+      ${em?.note?`<div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:4px">"${em.note.substring(0,80)}"</div>`:''}
     </div>`;
   }).join('');
 
-  const lossNote = deal.why
-    ? `<div style="margin-top:16px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.3);border-radius:10px;padding:14px 18px;font-size:13px;">
-        <strong style="color:var(--accent2);">Powód przegranej: ${deal.why}</strong>
-        <span style="color:var(--muted);display:block;margin-top:3px;">Jeśli powód leży poza kreacją (Cena, Zakres), win rate grafika nie jest obciążony.</span>
-       </div>` : '';
-
-  container.innerHTML = `
-    <div class="lookup-result">
-      <div class="lr-header">
-        <div>
-          <div class="lr-name">[${deal.id}] ${deal.name}</div>
-          <div class="lr-meta">${deal.cat} · ${deal.mkt} · ${deal.date} · <strong>${fmtPLN(deal.value)} PLN</strong></div>
-        </div>
-        ${statusTag(deal)}
+  return `${currentRole==='grafik'?`<div class="grafik-selector">${btns}</div>`:''}
+  <div class="grafik-profile">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+      ${avatarHtml(d,52)}
+      <div>
+        <div class="grafik-profile-name">${d.name}</div>
+        <div class="grafik-profile-role">${d.role} · ${d.exp}</div>
       </div>
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Zespół projektowy</div>
-      ${crewHtml}
-      ${lossNote}
-    </div>`;
+      ${wr!==null?`<div style="margin-left:auto;text-align:right"><div style="font-size:32px;font-weight:800;color:var(--accent4)">${wr}%</div><div style="font-size:12px;color:var(--muted)">win rate ogólny</div></div>`:''}
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;color:var(--muted);margin-bottom:8px">Trajektoria win rate — styczeń–maj 2026</div>
+      ${trajSVG(selectedDesigner)}
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px">
+        <div class="dc-react"><span class="dc-react-icon">✅</span><span class="dc-react-label">Wybrany</span><span class="dc-react-val won">${r.wybrany}</span></div>
+        <div class="dc-react"><span class="dc-react-icon">🔶</span><span class="dc-react-label">Wpłynął</span><span class="dc-react-val inf">${r.wplynął}</span></div>
+        <div class="dc-react"><span class="dc-react-icon">❌</span><span class="dc-react-label">Nie wybrany</span><span class="dc-react-val lost">${r.nie_wybrany}</span></div>
+        <div class="dc-react"><span class="dc-react-icon">🚫</span><span class="dc-react-label">Nie wysłany</span><span class="dc-react-val ns">${r.nie_wyslany}</span></div>
+      </div>
+    </div>
+  </div>
+  <div style="font-size:14px;font-weight:700;margin-bottom:12px">Historia miesięczna</div>
+  <div class="months-grid">${monthCards}</div>`;
 }
 
-// ══════════════════════════════════════════════
-//  FILTRY
-// ══════════════════════════════════════════════
-function populateFilters() {
-  const sel = document.getElementById('f-designer');
-  DESIGNERS.filter(d=>d.type==='creative').forEach(d => {
-    const o = document.createElement('option');
-    o.value = d.id; o.textContent = d.name;
-    sel.appendChild(o);
-  });
-  applyFilters();
+function selectGrafik(id){ selectedDesigner=id; switchTab('moje'); }
+
+// ===================== MODAL =====================
+function openModal(html){
+  document.getElementById('modal-inner').innerHTML=html;
+  document.getElementById('modal').classList.remove('hidden');
 }
-
-function applyFilters() {
-  const fD = document.getElementById('f-designer').value;
-  const fC = document.getElementById('f-cat').value;
-  const fM = document.getElementById('f-market').value;
-  const fS = document.getElementById('f-status').value;
-
-  let res = DEALS;
-  if (fD) res = res.filter(d => d.crew.some(c=>c.id===fD));
-  if (fC) res = res.filter(d => d.cat === fC);
-  if (fM) res = res.filter(d => d.mkt === fM);
-  if (fS) res = res.filter(d => d.status === fS);
-
-  const won = res.filter(d=>d.status==='won').length;
-  const rev = res.filter(d=>d.status==='won').reduce((s,d)=>s+d.value,0);
-  document.getElementById('filter-info').textContent =
-    `${res.length} deal${res.length===1?'':'i'} · ${won} won · ${res.length-won} lost · Revenue: ${fmtPLN(rev)} PLN`;
-
-  const rows = res.map(deal => {
-    const lead = deal.crew.find(c=>c.role==='LEAD');
-    const leadName = lead ? (byId(lead.id)?.name||'—') : '—';
-    return `<tr>
-      <td style="font-family:monospace;font-size:12px;color:var(--muted);">[${deal.id}]</td>
-      <td><strong>${deal.name}</strong></td>
-      <td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:4px;">${deal.cat}</span></td>
-      <td><span style="font-size:11px;background:var(--surface2);padding:2px 8px;border-radius:4px;">${deal.mkt}</span></td>
-      <td>${leadName}</td>
-      <td style="color:var(--muted);">${deal.crew.length}</td>
-      <td>${statusTag(deal)}</td>
-      <td style="font-weight:700;text-align:right;">${fmtPLN(deal.value)} PLN</td>
-    </tr>`;
-  }).join('') || `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px;">Brak wyników</td></tr>`;
-
-  document.getElementById('filter-table').innerHTML =
-    `<thead><tr><th>Deal ID</th><th>Projekt</th><th>Kategoria</th><th>Rynek</th><th>LEAD</th><th>Graficy</th><th>Status</th><th style="text-align:right;">Wartość</th></tr></thead><tbody>${rows}</tbody>`;
+function closeModal(){
+  document.getElementById('modal').classList.add('hidden');
 }
+document.getElementById('modal').addEventListener('click', function(e){
+  if(e.target===this) closeModal();
+});
 
-function resetFilters() {
-  ['f-designer','f-cat','f-market','f-status'].forEach(id => { document.getElementById(id).value = ''; });
-  applyFilters();
+// ===================== TOAST =====================
+function showToast(msg){
+  const t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--accent);color:var(--accent);padding:10px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:999;animation:fadeIn .2s';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2500);
 }
-
-// ══════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════
-renderDashboard();
-renderDesignerGrid();
-populateFilters();
 </script>
 </body>
 </html>
