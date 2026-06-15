@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FYNK — Klienci & Dane Rynkowe</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0B0F1A;
+    --surface: #141824;
+    --border: #1E2535;
+    --accent: #5B6EFF;
+    --accent2: #FF5B8D;
+    --gold: #FFB800;
+    --text: #E8EAF0;
+    --muted: #6B7280;
+    --green: #22C55E;
+    --slide-w: 100vw;
+    --slide-h: 100vh;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* SLIDES */
+  #deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    padding: 48px 64px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .slide.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  /* HEADER */
+  .slide-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .slide-title {
+    font-size: clamp(28px, 3.5vw, 48px);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .slide-sub {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 36px;
+  }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; flex: 1; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; flex: 1; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .stat-big {
+    font-size: clamp(26px, 3vw, 42px);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--text);
+  }
+  .stat-label {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(91,110,255,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(91,110,255,0.3);
+  }
+  .badge.green { background: rgba(34,197,94,0.1); color: var(--green); border-color: rgba(34,197,94,0.3); }
+  .badge.gold { background: rgba(255,184,0,0.1); color: var(--gold); border-color: rgba(255,184,0,0.3); }
+  .badge.red { background: rgba(255,91,141,0.15); color: var(--accent2); border-color: rgba(255,91,141,0.3); }
+
+  /* QUOTE */
+  .quote-block {
+    background: rgba(91,110,255,0.06);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    font-style: italic;
+    color: #B8BFCC;
+    flex: 1;
+  }
+  .quote-author {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /* SOURCE LINKS */
+  a.src {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10.5px;
+    color: var(--muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  a.src:hover { color: var(--accent); border-color: var(--accent); }
+  a.src::after { content: '↗'; font-size: 9px; }
+
+  .sources {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+    padding-top: 10px;
+  }
+
+  /* COVER */
+  .cover-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .cover-tag {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  .cover-title {
+    font-size: clamp(40px, 5.5vw, 72px);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .cover-title span { color: var(--accent); }
+  .cover-desc {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.6;
+  }
+  .cover-meta {
+    margin-top: 48px;
+    display: flex;
+    gap: 40px;
+  }
+  .cover-meta-item strong {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+  }
+  .cover-meta-item span {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* DIVIDER SLIDE */
+  .divider-slide {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .divider-number {
+    font-size: 120px;
+    font-weight: 900;
+    color: rgba(91,110,255,0.08);
+    line-height: 1;
+    margin-bottom: -20px;
+  }
+  .divider-label {
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .divider-title {
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 800;
+  }
+  .divider-sub {
+    font-size: 16px;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+
+  /* STAT LIST */
+  .stat-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .stat-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-list li:last-child { border-bottom: none; }
+  .stat-list .label { font-size: 13.5px; color: var(--muted); flex: 1; }
+  .stat-list .value { font-size: 14px; font-weight: 700; text-align: right; color: var(--text); }
+
+  /* ARGUMENT CARDS */
+  .arg-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .arg-num {
+    font-size: 28px;
+    font-weight: 900;
+    color: rgba(91,110,255,0.25);
+    line-height: 1;
+    min-width: 36px;
+  }
+  .arg-content strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .arg-content p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #B8BFCC;
+    font-style: italic;
+  }
+
+  /* NAVIGATION */
+  #nav {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(20, 24, 36, 0.9);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 8px 20px;
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  #nav button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+    line-height: 1;
+  }
+  #nav button:hover { color: var(--text); background: var(--border); }
+  #nav button:disabled { opacity: 0.2; cursor: default; }
+  #counter {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    min-width: 48px;
+    text-align: center;
+  }
+  #dots {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active {
+    background: var(--accent);
+    transform: scale(1.4);
+  }
+
+  /* LOGO */
+  .slide-logo {
+    position: fixed;
+    top: 20px;
+    right: 28px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    opacity: 0.4;
+    text-transform: uppercase;
+  }
+
+  /* DIVIDER LINE */
+  .divider-line {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  /* HIGHLIGHT */
+  .highlight { color: var(--accent); font-weight: 700; }
+  .highlight.green { color: var(--green); }
+  .highlight.gold { color: var(--gold); }
+</style>
+</head>
+<body>
+
+<div class="slide-logo">FYNK</div>
+
+<div id="deck">
+
+  <!-- SLIDE 0: COVER -->
+  <div class="slide active" id="s0">
+    <div class="cover-inner">
+      <div class="cover-tag">Badanie rynkowe · czerwiec 2026</div>
+      <h1 class="cover-title">Klienci FYNK<br><span>— dane rynkowe</span></h1>
+      <p class="cover-desc">Weryfikowalne dane sprzedażowe i strategiczne od klientów, dla których projektowaliśmy opakowania. Każda liczba pochodzi z publicznego źródła.</p>
+      <div class="cover-meta">
+        <div class="cover-meta-item">
+          <strong>15</strong>
+          <span>klientów</span>
+        </div>
+        <div class="cover-meta-item">
+          <strong>2</strong>
+          <span>rynki (PL + DE)</span>
+        </div>
+        <div class="cover-meta-item">
+          <strong>100%</strong>
+          <span>zweryfikowane źródła</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 1: KONTEKST RYNKU -->
+  <div class="slide" id="s1">
+    <div class="slide-label">Kontekst</div>
+    <h2 class="slide-title">Rynek, w którym działamy</h2>
+    <p class="slide-sub">Marki własne w Polsce i Europie — trend strukturalny, nie chwilowy</p>
+    <div class="grid-4">
+      <div class="card">
+        <div class="card-title">Wartość PL w Polsce</div>
+        <div class="stat-big">67 mld<br><span style="font-size:18px">PLN</span></div>
+        <div class="stat-label">Rynek marek własnych 2025</div>
+        <div class="sources">
+          <a class="src" href="https://www.wiadomoscihandlowe.pl/handel-i-dystrybucja/marki-wlasne-zwiekszaja-udzial-w-rynku-fmcg-private-label-warte-juz-67-mld-zl-2534956" target="_blank">WH 2025</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Wzrost PL rok do roku</div>
+        <div class="stat-big">+6,6%</div>
+        <div class="stat-label">Wartościowo w Polsce 2025</div>
+        <div class="sources">
+          <a class="src" href="https://www.wiadomoscihandlowe.pl/handel-i-dystrybucja/marki-wlasne-zwiekszaja-udzial-w-rynku-fmcg-private-label-warte-juz-67-mld-zl-2534956" target="_blank">YouGov 2025</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Udział PL w Niemczech</div>
+        <div class="stat-big">47%</div>
+        <div class="stat-label">Wartości sprzedaży grocery (rekord 2026)</div>
+        <div class="sources">
+          <a class="src" href="https://lebensmittelpraxis.de/handel-aktuell/48880-handelsmarken-boom-eigenmarken-erobern-fast-die-haelfte-des-deutschen-lebensmittelmarkts.html" target="_blank">Lebensmittelpraxis</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Przewaga sieci z PL</div>
+        <div class="stat-big">2,8×</div>
+        <div class="stat-label">bardziej skłonne do wzrostu udziałów niż konkurenci</div>
+        <div class="sources">
+          <a class="src" href="https://www.mckinsey.com/industries/retail/our-insights/state-of-grocery-europe-2025" target="_blank">McKinsey 2025</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: DIVIDER — MARKI BRANDOWANE -->
+  <div class="slide divider-slide" id="s2">
+    <div class="divider-number">I</div>
+    <div class="divider-label">Sekcja pierwsza</div>
+    <h2 class="divider-title">Marki brandowane</h2>
+    <p class="divider-sub">Hortex · Owolovo · Lambertz · Roleski · Iglotex · Krüger · BORN</p>
+  </div>
+
+  <!-- SLIDE 3: OWOLOVO -->
+  <div class="slide" id="s3">
+    <div class="slide-label">Marka brandowana · Polska</div>
+    <h2 class="slide-title">Owolovo — linia Jelly</h2>
+    <p class="slide-sub">Packaging · kategoria musów owocowych w tubkach</p>
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <div class="card-title">Wzrost kategorii</div>
+          <div class="stat-big">+28%</div>
+          <div class="stat-label">Wartościowo r/r (2022). Kategoria musów pouch w Polsce.</div>
+          <div class="sources">
+            <a class="src" href="https://pl.linkedin.com/posts/centrum-monitorowania-rynku_kategoria-mus%C3%B3w-owocowych-typu-pouch-w-polsce-activity-7084120383032897536-igIZ" target="_blank">CMR LinkedIn VII 2023</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Udział Owolovo w kategorii</div>
+          <div class="stat-big">&gt;10%</div>
+          <div class="stat-label">Wartościowo. Przekroczono próg 10% w Q2 2023.</div>
+          <div class="sources">
+            <a class="src" href="https://pl.linkedin.com/posts/centrum-monitorowania-rynku_kategoria-mus%C3%B3w-owocowych-typu-pouch-w-polsce-activity-7084120383032897536-igIZ" target="_blank">CMR Q2 2023</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Nagrody</div>
+          <div class="stat-big">5×</div>
+          <div class="stat-label">Statuetek na RetailTrends2023</div>
+          <div class="sources">
+            <a class="src" href="https://www.portalspozywczy.pl" target="_blank">Portal Spożywczy 2023</a>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="quote-block">
+          „Nasze przeciery dwustugramowe zrewolucjonizowały kategorię musów i spowodowały jej znaczący wzrost."
+          <div class="quote-author">Agnieszka Dobies, CCO Owolovo · Wiadomości Handlowe 12.10.2023</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Prognoza CCO na 2023 r.</div>
+          <div class="stat-big">+35–40%</div>
+          <div class="stat-label">Prognozowany wzrost wolumenowy kategorii</div>
+          <div class="sources">
+            <a class="src" href="https://www.wiadomoscihandlowe.pl/wywiady-i-opinie/agnieszka-dobies-chief-commercial-officer-owolovo-nasze-przeciery-dwustugramowe-zrewolucjonizowaly-kategorie-musow-i-spowodowaly-jej-znaczacy-wzrost-2493972" target="_blank">WH 12.10.2023</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: HORTEX -->
+  <div class="slide" id="s4">
+    <div class="slide-label">Marka brandowana · Polska</div>
+    <h2 class="slide-title">Hortex — wowoc, Ice Tea, Lemoniady</h2>
+    <p class="slide-sub">Rebranding całego portfolio · marzec 2025</p>
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <div class="card-title">Rynek soków, nektarów, napojów (PL)</div>
+          <div class="stat-big">~4,9 mld<br><span style="font-size:18px">PLN</span></div>
+          <div class="stat-label">Wartość rynku SNN w Polsce (NielsenIQ 2024)</div>
+          <div class="sources">
+            <a class="src" href="https://www.portalspozywczy.pl/owoce-warzywa/wiadomosci/ta-firma-zainwestowala-w-rebranding-to-strategiczna-decyzja,276186.html" target="_blank">portalspozywczy.pl</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Ocena kampanii po rebrandingu</div>
+          <div class="stat-big" style="font-size:22px;line-height:1.3">„Najmocniejsza kampania w historii marki"</div>
+          <div class="stat-label">Komunikat PR Hortex po rebrandingu</div>
+          <div class="sources">
+            <a class="src" href="https://www.dlahandlu.pl/detal-hurt/kampanie-reklamowe/hortex-w-nowej-odslonie-logo-opakowania-i-receptury,155989.html" target="_blank">dlahandlu.pl III 2025</a>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="quote-block">
+          „Rebranding Hortex to strategiczna decyzja, która pozwoli nam lepiej komunikować nasze wartości i odpowiadać na potrzeby współczesnych konsumentów."
+          <div class="quote-author">Urszula Bonecka, Dyrektor Marketingu Hortex · dlahandlu.pl, 24.03.2025</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Po rebrandingu — nowa linia wowoc</div>
+          <div class="badge green" style="font-size:13px;padding:6px 12px">Launch + flight mediowy: TikTok · Meta · YouTube</div>
+          <div class="stat-label" style="margin-top:8px">Kampania „Zacznij wydziwiać" · agencja KERRIS · VI 2026</div>
+          <div class="sources">
+            <a class="src" href="https://brief.pl/kerris-przygotowal-kampanie-launchowa-dla-hortex-wowoc-pod-haslem-zacznij-wydziwiac/" target="_blank">brief.pl VI 2026</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: LAMBERTZ + ROLESKI -->
+  <div class="slide" id="s5">
+    <div class="slide-label">Marki brandowane · Polska</div>
+    <h2 class="slide-title">Lambertz Polonia & Roleski</h2>
+    <p class="slide-sub">Linia słodyczy całorocznych · sosy</p>
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">LAMBERTZ POLONIA</div>
+        <div class="card">
+          <div class="card-title">Przychody 2022</div>
+          <div class="stat-big">693 mln<br><span style="font-size:18px">PLN</span></div>
+          <div class="stat-label">Wzrost z 464 mln PLN w 2020 r.</div>
+          <div class="sources">
+            <a class="src" href="https://www.bizraport.pl/krs/0000119662/lambertz-polonia-spolka-z-ograniczona-odpowiedzialnoscia" target="_blank">BizRaport / KRS</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Wzrost r/r (2023)</div>
+          <div class="grid-2" style="gap:8px;margin-top:4px">
+            <div>
+              <div class="stat-big" style="font-size:28px;color:var(--green)">+29%</div>
+              <div class="stat-label">Przychody</div>
+            </div>
+            <div>
+              <div class="stat-big" style="font-size:28px;color:var(--green)">+88%</div>
+              <div class="stat-label">Zysk netto</div>
+            </div>
+          </div>
+          <div class="sources">
+            <a class="src" href="https://www.bizraport.pl/krs/0000119662/lambertz-polonia-spolka-z-ograniczona-odpowiedzialnoscia" target="_blank">BizRaport 2023</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Udział w kategorii pierników</div>
+          <div class="grid-2" style="gap:8px">
+            <div><div class="stat-big" style="font-size:26px">64,5%</div><div class="stat-label">wartościowo</div></div>
+            <div><div class="stat-big" style="font-size:26px">76,5%</div><div class="stat-label">wolumenowo</div></div>
+          </div>
+          <div class="sources">
+            <a class="src" href="https://www.portalspozywczy.pl/inne/wiadomosci/lambertz-zwieksza-udzialy-w-polskim-rynku-piernikow-i-ciastek,19352.html" target="_blank">portalspozywczy.pl</a>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">ROLESKI — SOSY</div>
+        <div class="quote-block">
+          „Wzrost w kategorii sosów jest bardzo silny i sosy mają wielki potencjał."
+          <div class="quote-author">Marek Roleski, właściciel · portalspozywczy.pl</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Dynamika sprzedaży (wszystkie kanały)</div>
+          <div class="stat-big" style="font-size:26px">Dwucyfrowy wzrost</div>
+          <div class="stat-label">We wszystkich kanałach dystrybucji</div>
+          <div class="sources">
+            <a class="src" href="https://www.portalspozywczy.pl/owoce-warzywa/wiadomosci/marek-roleski-quot-tworzymy-produkty-z-mysla-o-innym-konsumencie-niz-korporacje-quot,226162.html" target="_blank">portalspozywczy.pl</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Inwestycja w kampanię</div>
+          <div class="stat-big">5,5 mln<br><span style="font-size:18px">PLN</span></div>
+          <div class="sources">
+            <a class="src" href="https://www.portalspozywczy.pl/owoce-warzywa/wiadomosci/firma-roleski-zainwestowala-5-5-mln-zl-w-kampanie-promocyjna,113444.html" target="_blank">portalspozywczy.pl</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: IGLOTEX + KRÜGER + BORN -->
+  <div class="slide" id="s6">
+    <div class="slide-label">Marki brandowane · PL + DE</div>
+    <h2 class="slide-title">Iglotex · Krüger · BORN</h2>
+    <p class="slide-sub">Bistro HoReCa · Chai Latte · Kids Ketchup</p>
+    <div class="grid-3">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">IGLOTEX — Bistro HoReCa</div>
+        <div class="card">
+          <div class="card-title">Przychody grupy 2024</div>
+          <div class="stat-big">1,65 mld<br><span style="font-size:16px">PLN</span></div>
+          <div class="stat-label">+7% r/r</div>
+          <div class="sources">
+            <a class="src" href="https://www.portalspozywczy.pl/technologie/wiadomosci/maciej-wlodarczyk-szef-iglotexu-quot-jestesmy-gotowi-na-fuzje-i-przejecia-quot,275091.html" target="_blank">portalspozywczy.pl 2025</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Udział HoReCa w dystrybucji</div>
+          <div class="stat-big">&gt;60%</div>
+          <div class="stat-label">Przychodów segmentu dystrybucji</div>
+        </div>
+        <div class="quote-block" style="font-size:12px">
+          „Marki dedykowane dla segmentu HoReCa zakończą proces rebrandingu w 2025 roku."
+          <div class="quote-author">Maciej Włodarczyk, prezes Iglotex · portalspozywczy.pl</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">KRÜGER — Chai Latte (DE)</div>
+        <div class="card">
+          <div class="card-title">Data soft-relaunchu opakowań</div>
+          <div class="stat-big" style="font-size:22px">Sierpień 2025</div>
+          <div class="stat-label">Cała linia Chai Latte. Nowa estetyka akwarelowa.</div>
+          <div class="sources">
+            <a class="src" href="https://www.about-drinks.com/krueger-erweitert-chai-latte-sortiment-um-neue-trendsorte/" target="_blank">about-drinks.com VIII 2025</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Zadeklarowany cel redesignu</div>
+          <div class="stat-big" style="font-size:18px;line-height:1.4">„Stärkere Regalwirkung"</div>
+          <div class="stat-label">Silniejszy efekt regałowy — oficjalny cel rebrandingu</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Skala firmy</div>
+          <div class="stat-label">Europejski lider instant beverages · 5 000 pracowników · 20 lokalizacji w 10 krajach</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">BORN — Kids Ketchup (DE)</div>
+        <div class="card">
+          <div class="card-title">Data launchu</div>
+          <div class="stat-big" style="font-size:22px">1 IV 2025</div>
+          <div class="sources">
+            <a class="src" href="https://www.rewe.de/shop/p/born-kids-ketchup-500ml/9857455" target="_blank">REWE</a>
+            <a class="src" href="https://born-feinkost.de/de/shop/806266/kids-ketchup" target="_blank">born-feinkost.de</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Dystrybucja</div>
+          <div class="badge green">REWE</div>
+          <div class="badge green" style="margin-top:6px">EDEKA</div>
+          <div class="stat-label" style="margin-top:8px">Dwie największe sieci w Niemczech</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Skala firmy BORN</div>
+          <div class="stat-big" style="font-size:22px">12,5 mln EUR</div>
+          <div class="stat-label">Lider rynku Turyngii od 30+ lat</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: DIVIDER — MARKI WŁASNE -->
+  <div class="slide divider-slide" id="s7">
+    <div class="divider-number">II</div>
+    <div class="divider-label">Sekcja druga</div>
+    <h2 class="divider-title">Marki własne sieci</h2>
+    <p class="divider-sub">Żabka · Dino · Lidl · Kaufland · Netto · Intermarché · Aldi · Lewiatan · SPAR · DOZ</p>
+  </div>
+
+  <!-- SLIDE 8: ŻABKA -->
+  <div class="slide" id="s8">
+    <div class="slide-label">Marka własna sieci · Polska</div>
+    <h2 class="slide-title">Żabka</h2>
+    <p class="slide-sub">Projekt opakowań marek własnych · 13 aktywnych marek</p>
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card">
+          <div class="card-title">Sprzedaż własnych marek 2024</div>
+          <div class="stat-big">1,8 mld<br><span style="font-size:18px">PLN</span></div>
+          <div class="sources">
+            <a class="src" href="https://gf24.pl/42537/znaczny-wzrost-sprzedazy-i-zyskow-grupy-zabka-za-2024-r/" target="_blank">Żabka Group wyniki 2024</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Sprzedaż własnych marek 2025</div>
+          <div class="stat-big">2,1 mld<br><span style="font-size:18px">PLN</span></div>
+          <div class="badge green" style="margin-top:4px">+16,7% r/r · +300 mln PLN</div>
+          <div class="sources">
+            <a class="src" href="https://www.zabkagroup.com" target="_blank">zabkagroup.com 2025</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Udział PL w kategorii gotowych posiłków</div>
+          <div class="stat-big">do 90%</div>
+          <div class="stat-label">Najszybciej rosnąca kategoria w sieci</div>
+          <div class="sources">
+            <a class="src" href="https://www.wiadomoscihandlowe.pl/artykul/zabka-rozwija-marki-wlasne" target="_blank">Wiadomości Handlowe</a>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="quote-block">
+          „Wchodzimy w przestrzeń żywności ultra świeżej, w asortyment, którego nie mają zwykłe sklepy spożywcze. Chcemy zagospodarować tę niszę naszą ofertą marki własnej."
+          <div class="quote-author">Anna Grabowska, VP Consumer Strategy Żabka · Wiadomości Handlowe 2023</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Wyniki sieci 2024</div>
+          <ul class="stat-list">
+            <li><span class="label">Sprzedaż do klientów końcowych</span><span class="value highlight">27,3 mld PLN</span></li>
+            <li><span class="label">Wzrost r/r</span><span class="value highlight green">+20%</span></li>
+            <li><span class="label">Zysk netto</span><span class="value">593 mln PLN (+66%)</span></li>
+            <li><span class="label">Udział w rynku (Nielsen IX 2025)</span><span class="value">10,7%</span></li>
+          </ul>
+          <div class="sources">
+            <a class="src" href="https://gf24.pl/42537/znaczny-wzrost-sprzedazy-i-zyskow-grupy-zabka-za-2024-r/" target="_blank">Żabka wyniki FY 2024</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: DINO -->
+  <div class="slide" id="s9">
+    <div class="slide-label">Marka własna sieci · Polska · GPW</div>
+    <h2 class="slide-title">Dino Polska</h2>
+    <p class="slide-sub">Projekt opakowań marek własnych · spółka notowana na GPW</p>
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card">
+          <div class="card-title">Udział PL w przychodach — ewolucja</div>
+          <div style="display:flex;gap:12px;align-items:flex-end;margin:8px 0">
+            <div style="text-align:center">
+              <div style="font-size:28px;font-weight:800;color:var(--muted)">4,1%</div>
+              <div style="font-size:11px;color:var(--muted)">2021</div>
+            </div>
+            <div style="font-size:20px;color:var(--border)">→</div>
+            <div style="text-align:center">
+              <div style="font-size:28px;font-weight:800;color:var(--muted)">4,5%</div>
+              <div style="font-size:11px;color:var(--muted)">2022</div>
+            </div>
+            <div style="font-size:20px;color:var(--border)">→</div>
+            <div style="text-align:center">
+              <div style="font-size:28px;font-weight:800;color:var(--muted)">6,1%</div>
+              <div style="font-size:11px;color:var(--muted)">2023</div>
+            </div>
+            <div style="font-size:20px;color:var(--border)">→</div>
+            <div style="text-align:center">
+              <div style="font-size:32px;font-weight:800;color:var(--green)">6,5%</div>
+              <div style="font-size:11px;color:var(--muted)">2024</div>
+            </div>
+          </div>
+          <div class="badge green">+58% udziału w 3 lata</div>
+          <div class="sources">
+            <a class="src" href="https://grupadino.pl/wp-content/uploads/2025/04/Dino-Polska-Management-Boards-Activity-Report-for-2024.pdf" target="_blank">Raport zarządu 2024</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Liczba marek własnych</div>
+          <div class="stat-row">
+            <div style="text-align:center"><div class="stat-big" style="color:var(--muted)">24</div><div class="stat-label">2021</div></div>
+            <div style="font-size:24px;color:var(--border);margin:0 8px">→</div>
+            <div style="text-align:center"><div class="stat-big" style="color:var(--green)">36</div><div class="stat-label">2024</div></div>
+          </div>
+          <div class="stat-label" style="margin-top:8px">+12 nowych marek w 2 lata — zmiana strategii na aktywne budowanie PL</div>
+          <div class="sources">
+            <a class="src" href="https://www.dlahandlu.pl/detal-hurt/12-nowych-marek-wlasnych-w-2-lata-dino-zmienilo-strategie" target="_blank">dlahandlu.pl 2024</a>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="card">
+          <div class="card-title">Agro-Rydzyna — własny zakład mięsny</div>
+          <div class="stat-big">14,2%</div>
+          <div class="stat-label">Skonsolidowanych przychodów sieci (2024). Własna produkcja mięsna = skala 10 największych zewnętrznych dostawców łącznie.</div>
+          <div class="sources">
+            <a class="src" href="https://grupadino.pl/wp-content/uploads/2025/04/Dino-Polska-Management-Boards-Activity-Report-for-2024.pdf" target="_blank">Raport zarządu 2024</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Wyniki Dino Polska 2024</div>
+          <ul class="stat-list">
+            <li><span class="label">Przychody łączne</span><span class="value highlight">29,3 mld PLN</span></li>
+            <li><span class="label">Wzrost r/r</span><span class="value highlight green">+14,1%</span></li>
+            <li><span class="label">Liczba sklepów</span><span class="value">2 688 (+283)</span></li>
+            <li><span class="label">Szacunkowa wartość sprzedaży PL</span><span class="value">~1,9 mld PLN</span></li>
+          </ul>
+          <div class="sources">
+            <a class="src" href="https://grupadino.pl/raport-biezacy-nr-3-2025-wstepne-wybrane-wyniki-finansowe" target="_blank">GPW komunikat 2025</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: LIDL + KAUFLAND -->
+  <div class="slide" id="s10">
+    <div class="slide-label">Marki własne sieci · PL + DE</div>
+    <h2 class="slide-title">Lidl Polska & Kaufland Niemcy</h2>
+    <p class="slide-sub">Projekt opakowań marek własnych</p>
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">LIDL POLSKA</div>
+        <div class="card">
+          <div class="card-title">Udział PL w obrotach</div>
+          <div class="stat-big">~70%</div>
+          <div class="stat-label">Oficjalny komunikat PR Lidl Polska</div>
+          <div class="sources">
+            <a class="src" href="https://www.wiadomoscihandlowe.pl/artykuly/lidl-chce-zwiekszyc-sprzedaz-produktow-marki-wlasn,8543" target="_blank">Wiadomości Handlowe</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Przychody 2024</div>
+          <div class="stat-big">41,3 mld<br><span style="font-size:18px">PLN</span></div>
+          <div class="badge green">+8,9% r/r</div>
+          <div class="stat-label" style="margin-top:8px">9. największa firma w Polsce</div>
+          <div class="sources">
+            <a class="src" href="https://www.dlahandlu.pl/detal-hurt/ponad-41-mld-zl-przychodow-lidla-i-inwestycja-w-operatora-systemu-kaucyjnego,161362.html" target="_blank">dlahandlu.pl II 2025</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Portfolio PL</div>
+          <div class="stat-label">100+ brandów · 1 200+ produktów · Belmont, Favorina, Nixe, Chef Select, Solevita, Fin Carré…</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">KAUFLAND NIEMCY</div>
+        <div class="card">
+          <div class="card-title">Obroty 2024</div>
+          <div class="stat-big">35,2 mld<br><span style="font-size:18px">EUR</span></div>
+          <div class="badge green">+2,9% r/r</div>
+          <div class="sources">
+            <a class="src" href="https://unternehmen.kaufland.de/presse/newsroom/2025/gemeinsam-nachhaltig-wachsen-die-unternehmen-der-schwarz-gruppe-verzeichnen-positive-entwicklung-im-geschaeftsjahr-2024-und-erhoehen-ihre-investitionen" target="_blank">Schwarz Group 2025</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Portfolio PL + aktywny redesign</div>
+          <div class="stat-big">4 500+ SKU</div>
+          <div class="stat-label">Trwa kompleksowy redesign wszystkich marek własnych</div>
+          <div class="sources">
+            <a class="src" href="https://www.biopress.de/de/inhalte/details/10782/kaufland-gestaltet-eigenmarken-neu.html" target="_blank">biopress.de</a>
+          </div>
+        </div>
+        <div class="quote-block" style="font-size:12px">
+          „Nowy jednolity wizerunek sprawia, że nasza oferta staje się bardziej widoczna w sklepach."
+          <div class="quote-author">Jochen Baab, dyrektor ds. zakupów Kaufland · oficjalny komunikat</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: NETTO + INTERMARCHÉ -->
+  <div class="slide" id="s11">
+    <div class="slide-label">Marki własne sieci · Polska</div>
+    <h2 class="slide-title">Netto & Intermarché</h2>
+    <p class="slide-sub">Projekt opakowań marek własnych</p>
+    <div class="grid-2">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">NETTO POLSKA</div>
+        <div class="card">
+          <div class="card-title">Udział PL w sprzedaży Polska (wartościowo)</div>
+          <div class="stat-big">~45%</div>
+          <div class="sources">
+            <a class="src" href="https://www.rp.pl/handel/art44433381-polacy-odwracaja-sie-od-marek-wlasnych-markowe-produkty-znow-wygrywaja" target="_blank">ABR SESTA / Rzeczpospolita V 2026</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Netto 4.0 — projekt rebrandingu PL</div>
+          <div class="stat-big">400 mln<br><span style="font-size:16px">DKK</span></div>
+          <div class="stat-label">Inwestycja właściciela (Salling Group) w konsolidację i redesign marek własnych</div>
+          <div class="sources">
+            <a class="src" href="https://www.nordiskpost.com/2026/04/20/netto-4-0-launches-in-denmark-salling-group/" target="_blank">nordiskpost.com IV 2026</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Salling Group (właściciel) 2025</div>
+          <div class="stat-big" style="font-size:26px">83,2 mld DKK</div>
+          <div class="badge green">+15,2% r/r</div>
+          <div class="sources">
+            <a class="src" href="https://www.dlahandlu.pl/detal-hurt/salling-group-przyspiesza-w-europie-rekordowe-wyniki-i-najwieksze-przejecie-w-historii,169651.html" target="_blank">dlahandlu.pl 2026</a>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em">INTERMARCHÉ POLSKA</div>
+        <div class="card">
+          <div class="card-title">Udział PL Polska → cel</div>
+          <div class="stat-row" style="gap:12px">
+            <div><div class="stat-big" style="font-size:28px;color:var(--muted)">&gt;10%</div><div class="stat-label">dziś</div></div>
+            <div style="font-size:20px;color:var(--border)">→</div>
+            <div><div class="stat-big" style="font-size:28px;color:var(--accent)">~20%</div><div class="stat-label">cel 5 lat</div></div>
+          </div>
+          <div class="sources">
+            <a class="src" href="https://muszkieterowie.pl/11191-2/" target="_blank">Future PL Summit X 2025</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Rebranding PL (centrala Francja)</div>
+          <ul class="stat-list" style="font-size:13px">
+            <li><span class="label">SKU objęte rebrandingiem</span><span class="value highlight">9 500</span></li>
+            <li><span class="label">Budżet na redesign</span><span class="value highlight">€10 mln</span></li>
+            <li><span class="label">Horyzont</span><span class="value">2025–2027</span></li>
+            <li><span class="label">Cel udziału PL (Francja)</span><span class="value">35,3% → 40%</span></li>
+          </ul>
+          <div class="sources">
+            <a class="src" href="https://www.retaildetail.eu/news/food/intermarche-kicks-off-ambitious-private-label-rebrand/" target="_blank">retaildetail.eu XI 2024</a>
+            <a class="src" href="https://www.plma.com/article/intermarches-bold-private-label-rebranding-and-growth-plans" target="_blank">PLMA</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: ALDI + LEWIATAN + SPAR + DOZ -->
+  <div class="slide" id="s12">
+    <div class="slide-label">Marki własne sieci · Polska</div>
+    <h2 class="slide-title">Aldi · Lewiatan · SPAR · DOZ</h2>
+    <div class="grid-4">
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">ALDI</div>
+        <div class="card">
+          <div class="card-title">Udział PL w asortymencie</div>
+          <div class="stat-big">&gt;85%</div>
+          <div class="sources">
+            <a class="src" href="https://www.wiadomoscihandlowe.pl/handel-i-dystrybucja/dyskonty-spozywcze-i-przemyslowe/alexander-lauer-aldi-nord-private-label-to-serce-naszej-sieci-stanowia-ponad-80-proc-naszego-asortymentu-2520906" target="_blank">WH X 2024</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Nowe prod. PL w 2025</div>
+          <div class="stat-big">500+</div>
+          <div class="sources">
+            <a class="src" href="https://www.aldi.pl/o-firmie/komunikaty-prasowe/aldi-polska-startuje-z-nowa-kampania-marek-wlasnych.html" target="_blank">aldi.pl</a>
+          </div>
+        </div>
+        <div class="quote-block" style="font-size:11.5px">
+          „Private label to serce naszej sieci."
+          <div class="quote-author">Alexander Lauer, Dyrektor Zakupów Aldi Nord</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">LEWIATAN</div>
+        <div class="card">
+          <div class="card-title">Sprzedaż PL 2025</div>
+          <div class="stat-big">1,02 mld<br><span style="font-size:16px">PLN</span></div>
+          <div class="badge green">Po raz pierwszy &gt;1 mld</div>
+          <div class="sources">
+            <a class="src" href="https://www.portalspozywczy.pl/handel/wiadomosci/lewiatan-osiagnal-1-mld-zl-ze-sprzedazy-produktow-marki-wlasnej,274204.html" target="_blank">portalspozywczy.pl II 2025</a>
+            <a class="src" href="https://omnichannelnews.pl/2026/02/20/lewiatan-przekracza-18-mld-zl-obrotu-marka-wlasna-i-nowe-sklepy-napedzaja-rozwoj/" target="_blank">omnichannelnews II 2026</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Wzrost r/r</div>
+          <div class="stat-big">+3,4%</div>
+          <div class="stat-label">Obroty sieci 2025: 18,1 mld PLN</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">SPAR POLSKA</div>
+        <div class="card">
+          <div class="card-title">Portfolio PL</div>
+          <div class="stat-big">700+ SKU</div>
+          <div class="stat-label">80% od polskich producentów</div>
+          <div class="sources">
+            <a class="src" href="https://www.foodbeverage-outlook.com/food-retail-distribution/spar-poland-growth-in-groceries" target="_blank">foodbeverage-outlook</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">GK Specjał (właściciel SPAR PL) 2025</div>
+          <div class="stat-big" style="font-size:22px">4,6 mld PLN</div>
+          <div class="badge green">+28% r/r</div>
+          <div class="sources">
+            <a class="src" href="https://retailnet.pl/2026/02/17/wlasciciel-marki-spar-zamyka-2025-rok/" target="_blank">retailnet.pl II 2026</a>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px">DOZ — APTEKI</div>
+        <div class="card">
+          <div class="card-title">Portfolio PL</div>
+          <div class="stat-big">716</div>
+          <div class="stat-label">Produktów · 8 marek własnych</div>
+          <div class="sources">
+            <a class="src" href="https://www.doz.pl/apteka/k4925-DOZkonale_Marki" target="_blank">doz.pl</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Certyfikat jakości</div>
+          <div class="badge gold">ISO 9001:2015</div>
+          <div class="stat-label" style="margin-top:8px">Cały proces PL certyfikowany</div>
+          <div class="sources">
+            <a class="src" href="https://www.wiadomoscikosmetyczne.pl/dystrybucja-kosmetykow/sieci-aptek/doz-liderem-marek-wlasnych-jakosc-bez-kompromisow-2502153" target="_blank">wiadomoscikosmetyczne.pl</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Pozycja rynkowa</div>
+          <div class="stat-big" style="font-size:26px">20%</div>
+          <div class="stat-label">Udziału w rynku aptecznym · lider · 6 mln pacjentów/mies.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 13: ARGUMENTY HANDLOWE -->
+  <div class="slide" id="s13">
+    <div class="slide-label">Podsumowanie</div>
+    <h2 class="slide-title">Argumenty handlowe</h2>
+    <p class="slide-sub">Gotowe do użycia w rozmowie z prospektem</p>
+    <div style="display:flex;flex-direction:column;gap:12px;flex:1">
+      <div class="arg-card">
+        <div class="arg-num">1</div>
+        <div class="arg-content">
+          <strong>Skala rynku (opener)</strong>
+          <p>„Marki własne w Polsce są warte 67 mld PLN i rosną o 6,6% rocznie. Sieci z wyższym udziałem PL są 2,8× bardziej skłonne do wzrostu rynkowego. Design opakowania to jedyne co odróżnia produkt własny sieci od marki producenckiej."</p>
+        </div>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">2</div>
+        <div class="arg-content">
+          <strong>Żabka — konkretny klient</strong>
+          <p>„Dla Żabki projektujemy marki własne, których sprzedaż wyniosła 2,1 mld PLN w 2025 roku — wzrost o 300 mln PLN rok do roku. W kategorii gotowych posiłków Żabka ma do 90% udziału private label. Każda złotówka tam to nasz projekt."</p>
+        </div>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">3</div>
+        <div class="arg-content">
+          <strong>Kaufland / Krüger — rynek DE</strong>
+          <p>„Kaufland właśnie przerabia design 4500 SKU marek własnych — dyrektor zakupów powiedział publicznie, że priorytetem jest widoczność na półce. Krüger przeprowadził soft-relaunch całej linii Chai Latte z tym samym celem: »stärkere Regalwirkung«."</p>
+        </div>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">4</div>
+        <div class="arg-content">
+          <strong>Owolovo — kategoria branded</strong>
+          <p>„Owolovo weszło w kategorię rosnącą o +28% rok do roku i zdobyło ponad 10% udziałów rynkowych. CCO mówiła wprost o rewolucji kategorii. Packaging był głównym narzędziem — nie budżet ATL, nie historia marki."</p>
+        </div>
+      </div>
+      <div class="arg-card">
+        <div class="arg-num">5</div>
+        <div class="arg-content">
+          <strong>Lewiatan — milestone klienta</strong>
+          <p>„Lewiatan sprzedał w 2025 roku ponad miliard złotych produktów własnej marki — po raz pierwszy w historii sieci. Prezes uznał to za kluczowy sukces roku. 560 produktów w 25 kategoriach — to jest skala, gdzie design ma bezpośrednie przełożenie finansowe."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- NAVIGATION -->
+<div id="nav">
+  <button id="btn-prev" onclick="go(-1)" title="Poprzedni">←</button>
+  <div id="dots"></div>
+  <span id="counter">1 / 14</span>
+  <button id="btn-next" onclick="go(1)" title="Następny">→</button>
+</div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let cur = 0;
+
+const dotsEl = document.getElementById('dots');
+const counter = document.getElementById('counter');
+const btnPrev = document.getElementById('btn-prev');
+const btnNext = document.getElementById('btn-next');
+
+// Build dots
+slides.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+function goTo(n) {
+  slides[cur].classList.remove('active');
+  dotsEl.children[cur].classList.remove('active');
+  cur = Math.max(0, Math.min(total - 1, n));
+  slides[cur].classList.add('active');
+  dotsEl.children[cur].classList.add('active');
+  counter.textContent = (cur + 1) + ' / ' + total;
+  btnPrev.disabled = cur === 0;
+  btnNext.disabled = cur === total - 1;
+}
+
+function go(dir) { goTo(cur + dir); }
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') { e.preventDefault(); go(1); }
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); go(-1); }
+});
+
+// Touch swipe
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+});
+
+goTo(0);
+</script>
+</body>
+</html>
